@@ -1,6 +1,6 @@
 import "~/components/UserCard/UserCard.scss";
 import type { UserCardProps } from "../../types/User";
-import { FaUserCircle, FaCalendarAlt, FaClock } from 'react-icons/fa';
+import { FaUserCircle, FaCalendar, FaClock } from 'react-icons/fa';
 
 const UserCard = ({ user }: UserCardProps) => {
     const getRoleBadgeClass = (role: string) => {
@@ -38,7 +38,7 @@ const UserCard = ({ user }: UserCardProps) => {
                 </div>
 
                 <div className="user-detail">
-                    <strong>Registriert am:</strong>
+                    <strong><FaCalendar /> Registriert am:</strong>
                     <span>{new Date(user.createdAt).toLocaleDateString('de-DE', {
                         day: '2-digit',
                         month: '2-digit',

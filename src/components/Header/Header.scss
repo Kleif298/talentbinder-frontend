@@ -1,4 +1,5 @@
 @use "../../styles/_variables.scss" as vars;
+@use "sass:color";
 
 header {
   top: 0;
@@ -72,7 +73,7 @@ nav {
   flex-direction: row;
   width: 100%;
   margin: 0;
-  padding: 0; 
+  padding: 0;
 
   &:not(.active) {
     box-shadow: inset 5px 5px 5px 0 rgba(0, 0, 0, 0.25);
@@ -113,6 +114,6 @@ nav a {
   white-space: nowrap;
 
   &:hover {
-    background-color: darken(vars.$error-color, 10%);
+    background-color: color.adjust(vars.$error-color, $lightness: -10%);
   }
 }
