@@ -2,7 +2,6 @@
 node_modules/
 .pnpm-store/
 yarn.lock
-package-lock.json
 
 # build output
 dist/
@@ -15,6 +14,7 @@ out/
 .env.local
 .env.*.local
 *.local
+.env.production
 
 # logs
 logs/

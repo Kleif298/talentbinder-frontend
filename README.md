@@ -1,69 +1,135 @@
-# React + TypeScript + Vite
+# TalentBinder Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## Deployment-Konfiguration
 
-Currently, two official plugins are available:
+### Repository
+- **Standort**: GitLab (oder dein Git-Provider)
+- **Default Branch**: `main`
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+### Web-Adressen
+- **Produktion**: `https://talentbinder.com` (Beispiel-Domain)
 
-## Expanding the ESLint configuration
+### JavaScript-Skripte
+Die folgenden Skripte sind in der `package.json` definiert:
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```json
+{
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "lint": "eslint .",
+    "preview": "vite preview"
+  }
+}
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+### Globale Abhängigkeiten
+- **Node.js**: Version 18 oder höher
+- **npm**: Wird automatisch mit Node.js installiert
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+### Projekt-Abhängigkeiten
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+**Laufzeit-Abhängigkeiten:**
+- `jwt-decode`: ^4.0.0
+- `react`: ^19.1.1
+- `react-dom`: ^19.1.1
+- `react-router-dom`: ^7.9.1
+- `react-icons`: ^4.11.0
+
+**Entwicklungs-Abhängigkeiten:**
+- `@eslint/js`: ^9.35.0
+- `@types/react`: ^19.1.13
+- `@types/react-dom`: ^19.1.9
+- `@vitejs/plugin-react`: ^5.0.2
+- `eslint`: ^9.35.0
+- `eslint-plugin-react-hooks`: ^5.2.0
+- `eslint-plugin-react-refresh`: ^0.4.20
+- `globals`: ^16.4.0
+- `sass`: ^1.93.1
+- `typescript`: ~5.8.3
+- `typescript-eslint`: ^8.43.0
+- `vite`: ^7.1.6
+
+### Dateistruktur
+Alle wichtigen Dateien befinden sich im `frontend`-Verzeichnis:
+- `package.json`
+- `vite.config.ts`
+- `README.md`
+- `public/` (Statische Assets)
+- `src/` (React-Quellcode)
+
+### Framework
+- **Typ**: JavaScript Client-Side (React mit Vite und TypeScript)
+- **Server-seitig**: Nein
+
+---
+
+## Quick-Setup-Befehle
+
+### 1. Abhängigkeiten installieren
+```bash
+npm install
 ```
+
+### 2. Entwicklungsserver starten
+```bash
+npm run dev
+# Läuft standardmäßig auf http://localhost:5173
+```
+
+### 3. Produktions-Build erstellen
+```bash
+# Erstellt den `dist/`-Ordner mit den statischen Dateien
+npm run build
+```
+
+---
+
+## Produktions-Deployment (mit Nginx)
+
+### 1. Umgebungsvariable für die API
+Erstelle eine Datei namens `.env.production` im `frontend`-Verzeichnis mit der URL deines Backends:
+```
+# frontend/.env.production
+VITE_API_URL=https://talentbinder.com/api
+```
+
+### 2. Build-Dateien auf den Server kopieren
+Übertrage den Inhalt des `dist`-Ordners auf deinen Server, z.B. nach `/var/www/talentbinder-frontend`.
+
+### 3. Nginx als Reverse Proxy konfigurieren
+Erstelle eine Nginx-Konfigurationsdatei (z.B. `/etc/nginx/sites-available/talentbinder`), um das Frontend auszuliefern und die API-Anfragen an das Backend weiterzuleiten.
+
+```nginx
+# /etc/nginx/sites-available/talentbinder
+server {
+    listen 80;
+    server_name talentbinder.com;
+
+    # Pfad zum Frontend
+    root /var/www/talentbinder-frontend;
+    index index.html;
+
+    # Reverse Proxy für das Backend
+    location /api/ {
+        proxy_pass http://localhost:4000/; # Port des Backends
+        proxy_set_header Host $host;
+        # Weitere proxy-Header...
+    }
+
+    # SPA-Fallback für das Frontend
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+}
+```
+
+### 4. Nginx aktivieren
+```bash
+# Konfiguration aktivieren und Nginx neu laden
+sudo ln -s /etc/nginx/sites-available/talentbinder /etc/nginx/sites-enabled/
+sudo nginx -t
+sudo systemctl reload nginx
+```
+
+
