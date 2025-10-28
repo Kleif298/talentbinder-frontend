@@ -1,25 +1,18 @@
 const API_BASE = "http://localhost:4000/api";
 
 export const recruitersAPI = {
-  /**
-   * Abrufen aller verfügbaren Accounts (Recruiter)
-   */
   getAllAccounts: async () => {
     try {
-      const res = await fetch(`${API_BASE}/accounts`, {
-        credentials: "include"
-      });
-
+      const res = await fetch(`${API_BASE}/users`, { credentials: "include" });
       if (!res.ok) {
-        console.warn(`recruitersAPI: Got status ${res.status}, returning empty list`);
+        console.warn(`recruitersAPI: users list status ${res.status}, returning empty list`);
         return [];
       }
-
       const data = await res.json();
-      if (data.success) {
-        return data.accounts || [];
-      }
-      console.warn('recruitersAPI: Response success=false:', data.message);
+      // Backend liefert reines Array von Accounts
+      if (Array.isArray(data)) return data;
+      // Fallback für alternative Shapes
+      if (data?.success && Array.isArray(data.accounts)) return data.accounts;
       return [];
     } catch (err: any) {
       console.error('recruitersAPI: Error in getAllAccounts:', err);

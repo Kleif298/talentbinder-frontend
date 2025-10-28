@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react"
 import "./EventModal.scss"
 import { eventsAPI } from "../../api/eventsAPI"
 import { recruitersAPI } from "../../api/recruitersAPI"
+import { usersAPI } from "../../api/usersAPI"
 import type { EventForm, Event } from "../../types/Event"
 
 interface Account {
@@ -41,7 +42,7 @@ const EventModal = ({ eventToEdit, onSave, onClose, onDelete }: EventModalProps)
   // Lade verfügbare Accounts beim Mount
   useEffect(() => {
     const loadAccounts = async () => {
-      const accountsData = await recruitersAPI.getAllAccounts();
+      const accountsData = await usersAPI.getAll();
       setAccounts(accountsData);
     };
     loadAccounts();

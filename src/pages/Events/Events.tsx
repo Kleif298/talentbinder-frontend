@@ -69,6 +69,11 @@ const Events = () => {
                 <div className="event-list-section">
                     <div className="head-of-list">
                         <div className="head-of-list-content">
+                            <select className="date-select">
+                                <option value="all">Alle</option>
+                                <option value="upcoming">Bevorstehend</option>
+                                <option value="past">Vergangenheit</option>
+                            </select>
                             <EventModal 
                                 eventToEdit={eventToEdit} 
                                 onSave={eventToEdit ? handleEditEvent : handleCreateEvent}
@@ -78,7 +83,7 @@ const Events = () => {
                         </div>
                     </div>
                     <EventList 
-                        key={refreshKey}
+                        refreshKey={refreshKey}
                         onEditStart={(event) => setEventToEdit(event)}
                         onViewStart={(event) => setSelectedEvent(event)}
                     />

@@ -57,7 +57,7 @@ const Candidates = () => {
     setSelectedCandidate(candidate);
   };
 
-  // Funktion für das Speichern/Aktualisieren (POST oder PATCH)
+  // Funktion für das Speichern/Aktualisieren
   async function handleSaveCandidate(candidate: CandidateForm) {
     try {
       setMessage({ type: "info", text: candidateToEdit ? "Aktualisiere..." : "Speichere..." });
@@ -78,7 +78,7 @@ const Candidates = () => {
     }
   }
 
-  // Funktion für das Löschen (DELETE)
+  // Funktion für das Löschen
   async function handleDeleteCandidate(id: number) {
     if (!window.confirm("Sind Sie sicher, dass Sie diesen Kandidaten löschen möchten?")) {
         return;

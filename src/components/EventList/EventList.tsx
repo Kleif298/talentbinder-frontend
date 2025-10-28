@@ -7,13 +7,14 @@ import type { Event } from "../../types/Event";
 interface EventListProps {
     onEditStart?: (event: Event) => void;
     onViewStart?: (event: Event) => void;
+    refreshKey?: number;
 }
 
 interface EventWithRegistrations extends Event {
     registrationCount?: number;
 }
 
-const EventList = ({ onEditStart, onViewStart }: EventListProps) => {
+const EventList = ({ onEditStart, onViewStart, refreshKey }: EventListProps) => {
 
     const [events, setEvents] = useState<EventWithRegistrations[]>([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -68,7 +69,7 @@ const EventList = ({ onEditStart, onViewStart }: EventListProps) => {
             }
         }
         loadEvents();
-    }, []);
+    }, [refreshKey]);
     
     if (isLoading) {
         return <div className="grid-list-container">Lade Events...</div>;

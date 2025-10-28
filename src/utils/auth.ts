@@ -18,16 +18,23 @@ export function getUserData(): UserData | null {
 
 export function handleAuthResponse(data: any) {
   if (data.success && data.account) {
-    // Bereite User-Daten mit Admin-Status vor
     const userData: UserData = {
       id: data.account.id,
       email: data.account.email,
       role: data.account.role,
-      isAdmin: data.account.role === 'berufsbilder' // In diesem Fall ist jeder Berufsbilder auch Admin
+      isAdmin: data.account.role === 'berufsbilder'
     };
-    // Speichere User-Daten für Frontend-Status
     sessionStorage.setItem('user', JSON.stringify(userData));
   }
+}
+
+export function isOwnerOfEvent(eventCreatorId: number): boolean {
+  const userData = getUserData();
+  if (!userData) return false;
+  
+  if (userData.isAdmin) return true;
+  
+  return userData.id === eventCreatorId;
 }
 
 export function getAdminStatus(): boolean {

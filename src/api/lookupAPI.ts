@@ -14,14 +14,14 @@ export interface Branch {
   name: string;
 }
 
-const API_BASE = "http://localhost:4000/api";
+const API_BASE = "http://localhost:4000/api/lookups";
 
 export const lookupAPI = {
   /**
    * Abrufen aller Lehrstellen
    */
   getApprenticeships: async (): Promise<Apprenticeship[]> => {
-    const res = await fetch(`${API_BASE}/apprenticeships`, { credentials: "include" });
+  const res = await fetch(`${API_BASE}/apprenticeships`, { credentials: "include" });
 
     const data = await res.json();
     
@@ -45,7 +45,7 @@ export const lookupAPI = {
    * Abrufen aller Branchen
    */
   getBranches: async (): Promise<Branch[]> => {
-    const res = await fetch(`${API_BASE}/branches`, { credentials: "include" });
+  const res = await fetch(`${API_BASE}/branches`, { credentials: "include" });
 
     const data = await res.json();
     

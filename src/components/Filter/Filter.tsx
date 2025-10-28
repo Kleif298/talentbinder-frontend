@@ -15,14 +15,14 @@ const SortOptions = [
 
 const Filter = ({ onFilterChange }: FilterProps) => {
   const [search, setSearch] = useState("");
-  const [selectedStatuses, setSelectedStatuses] = useState<string[]>([]); // Array für mehrere Status
+  const [selectedStatuses, setSelectedStatuses] = useState<string[]>([]);
   const [sortBy, setSortBy] = useState("created_at_desc");
 
-  // Melde Änderungen an den Parent (Candidates.tsx)
+  // Melde Änderungen an den Parent 
   useEffect(() => {
     onFilterChange({
       search,
-      status: selectedStatuses.length > 0 ? selectedStatuses.join(',') : '', // Komma-getrennte Liste
+      status: selectedStatuses.length > 0 ? selectedStatuses.join(',') : '',
       sortBy
     });
   }, [search, selectedStatuses, sortBy, onFilterChange]);

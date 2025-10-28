@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import type { Event } from '../../types/Event';
 import { recruitersAPI } from '../../api/recruitersAPI';
 import { candidatesAPI } from '../../api/candidatesAPI';
+import { isOwnerOfEvent } from '../../utils/auth';
 import './InfoModal.scss';
 
 interface InfoModalProps {
@@ -46,6 +47,7 @@ const InfoModal = ({ event, isOpen, onClose }: InfoModalProps) => {
   const [showAddCandidate, setShowAddCandidate] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const isOwner = event ? isOwnerOfEvent(event.createdByAccountId) : false;
 
   useEffect(() => {
     if (event?.id && isOpen) {
@@ -188,6 +190,7 @@ const InfoModal = ({ event, isOpen, onClose }: InfoModalProps) => {
               <div className="section">
                 <h3>Anmeldungen ({registrationStats?.count || 0})</h3>
                 
+                {isOwner && (
                 <div className="registered-candidates">
                   {registrationStats && registrationStats.registrations.length > 0 ? (
                     <div className="candidate-list">
@@ -250,6 +253,7 @@ const InfoModal = ({ event, isOpen, onClose }: InfoModalProps) => {
                     </div>
                   )}
                 </div>
+                )}
               </div>
 
               <div className="section">
