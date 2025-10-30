@@ -5,7 +5,7 @@
 
 import type { Event, EventForm } from "../types/Event";
 
-const API_BASE = "http://localhost:4000/api";
+const API_BASE = "https://talentbinder-backend.onrender.com/api";
 
 export const eventsAPI = {
   /**

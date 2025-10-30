@@ -5,7 +5,7 @@
 
 import type { Candidate, CandidateForm } from "../types/Candidate";
 
-const API_BASE = "http://localhost:4000/api/candidates";
+const API_BASE = "https://talentbinder-backend.onrender.com/api/candidates";
 
 export const candidatesAPI = {
   /**

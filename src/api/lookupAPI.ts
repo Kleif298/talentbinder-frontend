@@ -14,7 +14,7 @@ export interface Branch {
   name: string;
 }
 
-const API_BASE = "http://localhost:4000/api/lookups";
+const API_BASE = "https://talentbinder-backend.onrender.com/api/lookups";
 
 export const lookupAPI = {
   /**

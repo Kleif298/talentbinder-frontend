@@ -112,7 +112,7 @@ server {
 
     # Reverse Proxy für das Backend
     location /api/ {
-        proxy_pass http://localhost:4000/; # Port des Backends
+        proxy_pass https://talentbinder-backend.onrender.com/; # Port des Backends
         proxy_set_header Host $host;
         # Weitere proxy-Header...
     }
