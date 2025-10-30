@@ -1,9 +1,11 @@
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import "./Header.scss";
 import { getAccountEmail, getAdminStatus } from "~/utils/auth.ts";
+import { MdHistory } from "react-icons/md";
 
 const Header = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const isActive = (path: string) => location.pathname === path;
   const isAdmin = getAdminStatus();
 
@@ -23,6 +25,11 @@ const Header = () => {
           <button className="logout-button" onClick={handleLogout}>
             Logout
           </button>
+          {isAdmin && (
+            <div onClick={() => {navigate("/logging");}} className="history-icon">
+              <MdHistory />
+            </div>
+          )}
         </div>
       </div>
       <nav>
