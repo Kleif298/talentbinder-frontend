@@ -4,7 +4,7 @@ import Register from "./pages/Register/Register";
 import Candidates from "./pages/Candidates/Candidates.tsx";
 import Events from "./pages/Events/Events";
 import Users from "./pages/Users/Users";
-import Logging from "./pages/Logging/logging.tsx";
+import Logging from "./pages/Logging/Logging.tsx";
 import ProtectedRoute from "./guards/ProtectedRoute";
 import AdminProtectedRoute from "./guards/AdminProtectedRoute";
 
