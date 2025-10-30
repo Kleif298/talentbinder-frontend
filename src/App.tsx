@@ -4,10 +4,12 @@ import Register from "./pages/Register/Register";
 import Candidates from "./pages/Candidates/Candidates.tsx";
 import Events from "./pages/Events/Events";
 import Users from "./pages/Users/Users";
+import Logging from "./pages/Logging/logging.tsx";
 import ProtectedRoute from "./guards/ProtectedRoute";
 import AdminProtectedRoute from "./guards/AdminProtectedRoute";
 
 import "./App.css"; 
+
 
 function App() {
   return (
@@ -37,6 +39,14 @@ function App() {
           element={
             <AdminProtectedRoute>
               <Users />
+            </AdminProtectedRoute>
+          }
+        />
+        <Route
+          path="/logging"
+          element={
+            <AdminProtectedRoute>
+              <Logging />
             </AdminProtectedRoute>
           }
         />
