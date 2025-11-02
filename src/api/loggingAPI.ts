@@ -40,7 +40,24 @@ const loggingAPI = {
     const response = await fetch(`${API_URL}/api/logging?${params.toString()}`, {
       credentials: "include",
     });
-    if (!response.ok) throw new Error("Failed to fetch logs");
+
+    // Wichtig: 204 No Content prüfen
+    if (response.status === 204) {
+      return { logs: [], total: 0, page: 1, totalPages: 0 };
+    }
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      let errorMessage = "Failed to fetch logs";
+      try {
+        const errorData = JSON.parse(errorText);
+        errorMessage = errorData.message || errorMessage;
+      } catch (e) {
+        errorMessage += ` (Status: ${response.status})`;
+      }
+      throw new Error(errorMessage);
+    }
+
     return response.json();
   },
 
@@ -48,7 +65,24 @@ const loggingAPI = {
     const response = await fetch(`${API_URL}/api/logging/user/${userId}?page=${page}&limit=${limit}`, {
       credentials: "include",
     });
-    if (!response.ok) throw new Error("Failed to fetch user logs");
+
+    // Wichtig: 204 No Content prüfen
+    if (response.status === 204) {
+      return { logs: [], total: 0, page: 1, totalPages: 0 };
+    }
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      let errorMessage = "Failed to fetch user logs";
+      try {
+        const errorData = JSON.parse(errorText);
+        errorMessage = errorData.message || errorMessage;
+      } catch (e) {
+        errorMessage += ` (Status: ${response.status})`;
+      }
+      throw new Error(errorMessage);
+    }
+
     return response.json();
   },
 
@@ -56,7 +90,24 @@ const loggingAPI = {
     const response = await fetch(`${API_URL}/api/logging/entity/${entityType}/${entityId}?page=${page}&limit=${limit}`, {
       credentials: "include",
     });
-    if (!response.ok) throw new Error("Failed to fetch entity logs");
+
+    // Wichtig: 204 No Content prüfen
+    if (response.status === 204) {
+      return { logs: [], total: 0, page: 1, totalPages: 0 };
+    }
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      let errorMessage = "Failed to fetch entity logs";
+      try {
+        const errorData = JSON.parse(errorText);
+        errorMessage = errorData.message || errorMessage;
+      } catch (e) {
+        errorMessage += ` (Status: ${response.status})`;
+      }
+      throw new Error(errorMessage);
+    }
+
     return response.json();
   },
 
@@ -64,7 +115,24 @@ const loggingAPI = {
     const response = await fetch(`${API_URL}/api/logging/stats`, {
       credentials: "include",
     });
-    if (!response.ok) throw new Error("Failed to fetch stats");
+
+    // Wichtig: 204 No Content prüfen
+    if (response.status === 204) {
+      return [];
+    }
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      let errorMessage = "Failed to fetch stats";
+      try {
+        const errorData = JSON.parse(errorText);
+        errorMessage = errorData.message || errorMessage;
+      } catch (e) {
+        errorMessage += ` (Status: ${response.status})`;
+      }
+      throw new Error(errorMessage);
+    }
+
     const data = await response.json();
     return data.stats;
   },

@@ -113,9 +113,21 @@ export const recruitersAPI = {
         credentials: "include"
       });
 
+      // Wichtig: Beim DELETE kann der Server 204 No Content senden, was kein JSON ist.
+      if (res.status === 204) {
+        return { success: true, message: "Recruiter removed" };
+      }
+
       if (!res.ok) {
-        const errData = await res.json().catch(() => ({}));
-        throw new Error(errData.message || `Server error: ${res.statusText}`);
+        const errorText = await res.text();
+        let errorMessage = `Server error: ${res.statusText}`;
+        try {
+          const errData = JSON.parse(errorText);
+          errorMessage = errData.message || errorMessage;
+        } catch (e) {
+          // Text war kein JSON
+        }
+        throw new Error(errorMessage);
       }
 
       const data = await res.json();
@@ -167,9 +179,21 @@ export const recruitersAPI = {
         credentials: "include"
       });
 
+      // Wichtig: Beim DELETE kann der Server 204 No Content senden, was kein JSON ist.
+      if (res.status === 204) {
+        return { success: true, message: "Candidate removed" };
+      }
+
       if (!res.ok) {
-        const errData = await res.json().catch(() => ({}));
-        throw new Error(errData.message || `Server error: ${res.statusText}`);
+        const errorText = await res.text();
+        let errorMessage = `Server error: ${res.statusText}`;
+        try {
+          const errData = JSON.parse(errorText);
+          errorMessage = errData.message || errorMessage;
+        } catch (e) {
+          // Text war kein JSON
+        }
+        throw new Error(errorMessage);
       }
 
       const data = await res.json();
