@@ -5,7 +5,8 @@
 
 import type { Event, EventForm } from "../types/Event";
 
-const API_BASE = "https://talentbinder-backend.onrender.com/api";
+const API_ROOT = import.meta.env.VITE_API_URL || "";
+const API_BASE = API_ROOT ? `${API_ROOT.replace(/\/$/, '')}/api` : '/api';
 
 export const eventsAPI = {
   /**

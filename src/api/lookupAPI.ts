@@ -14,7 +14,8 @@ export interface Branch {
   name: string;
 }
 
-const API_BASE = "https://talentbinder-backend.onrender.com/api/lookups";
+const API_ROOT = import.meta.env.VITE_API_URL || "";
+const API_BASE = API_ROOT ? `${API_ROOT.replace(/\/$/, '')}/api/lookups` : '/api/lookups';
 
 export const lookupAPI = {
   /**

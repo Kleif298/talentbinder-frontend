@@ -1,4 +1,5 @@
-const API_URL = import.meta.env.VITE_API_URL || "https://talentbinder-backend.onrender.com";
+const API_ROOT = import.meta.env.VITE_API_URL || "";
+const API_BASE = API_ROOT ? `${API_ROOT.replace(/\/$/, '')}/api` : '/api';
 
 export interface AuditLog {
   auditId: number;
@@ -37,7 +38,7 @@ const loggingAPI = {
     if (filters.page) params.append("page", filters.page.toString());
     if (filters.limit) params.append("limit", filters.limit.toString());
 
-    const response = await fetch(`${API_URL}/api/logging?${params.toString()}`, {
+  const response = await fetch(`${API_BASE}/logging?${params.toString()}`, {
       credentials: "include",
     });
 
@@ -62,7 +63,7 @@ const loggingAPI = {
   },
 
   getByUser: async (userId: number, page: number = 1, limit: number = 50): Promise<{ logs: AuditLog[]; total: number; page: number; totalPages: number }> => {
-    const response = await fetch(`${API_URL}/api/logging/user/${userId}?page=${page}&limit=${limit}`, {
+  const response = await fetch(`${API_BASE}/logging/user/${userId}?page=${page}&limit=${limit}`, {
       credentials: "include",
     });
 
@@ -87,7 +88,7 @@ const loggingAPI = {
   },
 
   getByEntity: async (entityType: string, entityId: number, page: number = 1, limit: number = 50): Promise<{ logs: AuditLog[]; total: number; page: number; totalPages: number }> => {
-    const response = await fetch(`${API_URL}/api/logging/entity/${entityType}/${entityId}?page=${page}&limit=${limit}`, {
+  const response = await fetch(`${API_BASE}/logging/entity/${entityType}/${entityId}?page=${page}&limit=${limit}`, {
       credentials: "include",
     });
 
@@ -112,7 +113,7 @@ const loggingAPI = {
   },
 
   getStats: async (): Promise<LoggingStats[]> => {
-    const response = await fetch(`${API_URL}/api/logging/stats`, {
+  const response = await fetch(`${API_BASE}/logging/stats`, {
       credentials: "include",
     });
 

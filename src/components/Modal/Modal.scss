@@ -63,6 +63,13 @@
     padding: 24px;
 }
 
+.name {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+
+}
+
 .form-group {
     margin-bottom: 20px;
 }
@@ -93,6 +100,30 @@
     outline: none;
     border-color: #3b82f6;
     box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.apprenticeship-list {
+    display: grid;
+    grid-template-rows: auto;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.apprenticeship-item {
+    background-color: #f5f5f5;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    padding: 8px 12px;
+    border-radius: 6px;
+}
+
+.apprenticeship-add-group {
+    display:grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
 }
 
 .checkbox-group {

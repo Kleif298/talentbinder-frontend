@@ -16,16 +16,20 @@ export function ModalCandidates({ candidateToEdit, onSave, onClose, onDelete, ap
   const [first_name, setFirstName] = useState("")
   const [last_name, setLastName] = useState("")
   const [email, setEmail] = useState("")
-  const [apprenticeship_id, setApprenticeshipId] = useState<number | undefined>(undefined)
+  // Selected apprenticeships (IDs) and helper for the add-select
+  const [selectedApprenticeships, setSelectedApprenticeships] = useState<number[]>([]);
+  const [selectedApprenticeshipToAdd, setSelectedApprenticeshipToAdd] = useState<number | "">("");
   const [status, setStatus] = useState<CandidateForm['status']>("Normal")
 
   // Setze den State, wenn ein Kandidat zum Bearbeiten übergeben wird
   useEffect(() => {
     if (candidateToEdit) {
-      setFirstName(candidateToEdit.first_name || "");
-      setLastName(candidateToEdit.last_name || "");
+      setFirstName(candidateToEdit.firstName || "");
+      setLastName(candidateToEdit.lastName || "");
       setEmail(candidateToEdit.email || "");
-      setApprenticeshipId(candidateToEdit.apprenticeship_id || undefined);
+      // Initialize selected apprenticeships from candidate when editing
+      const initApps = (candidateToEdit.apprenticeships || []).map((a: any) => a.id);
+      setSelectedApprenticeships(initApps);
       setStatus(candidateToEdit.status || "Normal");
       setIsOpen(true); 
     }
@@ -35,10 +39,29 @@ export function ModalCandidates({ candidateToEdit, onSave, onClose, onDelete, ap
     setFirstName("");
     setLastName("");
     setEmail("");
-    setApprenticeshipId(undefined);
+    setSelectedApprenticeships([]);
     setStatus("Normal");
     setError("");
   }
+
+  const handleAddApprenticeship = () => {
+    if (!selectedApprenticeshipToAdd) {
+      setError("Bitte wählen Sie einen Lehrberuf aus");
+      return;
+    }
+    const id = Number(selectedApprenticeshipToAdd);
+    if (selectedApprenticeships.includes(id)) {
+      setError("Dieser Lehrberuf ist bereits zugewiesen");
+      return;
+    }
+    setSelectedApprenticeships([...selectedApprenticeships, id]);
+    setSelectedApprenticeshipToAdd("");
+    setError("");
+  };
+
+  const handleRemoveApprenticeship = (id: number) => {
+    setSelectedApprenticeships(selectedApprenticeships.filter(i => i !== id));
+  };
 
   const handleSave = async () => {
     setError("");
@@ -55,7 +78,10 @@ export function ModalCandidates({ candidateToEdit, onSave, onClose, onDelete, ap
         first_name,
         last_name,
         email,
-        apprenticeship_id,
+        // Send both a primary apprenticeship_id for backward compatibility
+        // and apprenticeship_ids array for full persistence
+        apprenticeship_id: selectedApprenticeships[0] || undefined,
+        apprenticeship_ids: selectedApprenticeships.length > 0 ? selectedApprenticeships : undefined,
         status,
       }
       await onSave(candidate)
@@ -108,13 +134,15 @@ export function ModalCandidates({ candidateToEdit, onSave, onClose, onDelete, ap
 
             <div className="modal-body">
               <form onSubmit={(e) => { e.preventDefault(); handleSave(); }}>
-                <div className="form-group">
-                  <label htmlFor="firstName">Vorname</label>
-                  <input id="firstName" type="text" placeholder="Max" value={first_name} onChange={(e) => setFirstName(e.target.value)} required />
-                </div>
-                <div className="form-group">
-                  <label htmlFor="lastName">Nachname</label>
-                  <input id="lastName" type="text" placeholder="Mustermann" value={last_name} onChange={(e) => setLastName(e.target.value)} />
+                <div className="name">
+                  <div className="form-group">
+                    <label htmlFor="firstName">Vorname</label>
+                    <input id="firstName" type="text" placeholder="Max" value={first_name} onChange={(e) => setFirstName(e.target.value)} required />
+                  </div>
+                  <div className="form-group">
+                    <label htmlFor="lastName">Nachname</label>
+                    <input id="lastName" type="text" placeholder="Mustermann" value={last_name} onChange={(e) => setLastName(e.target.value)} />
+                  </div>
                 </div>
                 <div className="form-group">
                   <label htmlFor="email">Email-Adresse</label>
@@ -134,23 +162,45 @@ export function ModalCandidates({ candidateToEdit, onSave, onClose, onDelete, ap
                 <div className="form-group">
                   <label htmlFor="jobBranche">Lehrberuf</label>
                   {apprenticeships.length > 0 ? (
-                    <select 
-                      id="jobBranche" 
-                      value={apprenticeship_id || ''} 
-                      onChange={(e) => setApprenticeshipId(e.target.value ? parseInt(e.target.value) : undefined)}
-                    >
-                      <option value="">-- Wählen Sie einen Lehrberuf --</option>
-                      {apprenticeships.map((app: any) => (
-                        <option key={app.id} value={app.id}>{app.name}</option>
-                      ))}
-                    </select>
+                    <>
+                      <div className="apprenticeship-add-group">
+                        <select
+                          id="jobBranche"
+                          value={selectedApprenticeshipToAdd}
+                          onChange={(e) => setSelectedApprenticeshipToAdd(e.target.value ? Number(e.target.value) : "")}
+                        >
+                          <option value="">-- Wählen Sie einen Lehrberuf --</option>
+                          {apprenticeships.map((app: any) => (
+                            <option key={app.id} value={app.id}>{app.name}</option>
+                          ))}
+                        </select>
+                        <button type="button" className="btn btn-secondary" onClick={handleAddApprenticeship} disabled={!selectedApprenticeshipToAdd}>
+                          Hinzufügen
+                        </button>
+                      </div>
+
+                      {/* Liste der ausgewählten Lehrstellen */}
+                      {selectedApprenticeships.length > 0 && (
+                        <ul className="apprenticeship-list">
+                          {selectedApprenticeships.map(id => {
+                            const app = apprenticeships.find((a: any) => a.id === id);
+                            return app ? (
+                              <li key={id} className="apprenticeship-item">
+                                <span>{app.name}</span>
+                                <button type="button" className="btn btn-small btn-danger" onClick={() => handleRemoveApprenticeship(id)}>Entfernen</button>
+                              </li>
+                            ) : null;
+                          })}
+                        </ul>
+                      )}
+                    </>
                   ) : (
                     <input 
                       id="jobBranche" 
                       type="number" 
                       placeholder="z.B. 1" 
-                      value={apprenticeship_id || ''} 
-                      onChange={(e) => setApprenticeshipId(e.target.value ? parseInt(e.target.value) : undefined)} 
+                      value={selectedApprenticeships[0] || ''} 
+                      onChange={(e) => setSelectedApprenticeships(e.target.value ? [parseInt(e.target.value)] : [])} 
                     />
                   )}
                 </div>

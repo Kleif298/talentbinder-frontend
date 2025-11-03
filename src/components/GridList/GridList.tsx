@@ -19,19 +19,26 @@ const GridList = ({ refreshKey, filterParams, onEditCandidate, onViewCandidate }
 
   // Lade Kandidaten bei Erst-Render oder wenn sich refreshKey/filterParams ändert
   useEffect (() => {
+    const ac = new AbortController();
+
     async function loadCandidates() {
       setIsLoading(true);
       setError(null);
       try {
         const data = await fetchCandidatesData();
-        setCandidates(data);
+        // defensive dedupe in case backend returns duplicate rows
+        const unique = data.filter((c, i, arr) => arr.findIndex(x => x.id === c.id) === i);
+        if (!ac.signal.aborted) setCandidates(unique);
       } catch (err: any) {
-        setError("Fehler beim Laden der Kandidatendaten: " + err.message);
+        if (!ac.signal.aborted) setError("Fehler beim Laden der Kandidatendaten: " + err.message);
       } finally {
-        setIsLoading(false);
+        if (!ac.signal.aborted) setIsLoading(false);
       }
     }
-      loadCandidates();
+
+    loadCandidates();
+
+    return () => ac.abort();
   }, [refreshKey, filterParams]);
 
   if (isLoading) {
@@ -50,7 +57,7 @@ const GridList = ({ refreshKey, filterParams, onEditCandidate, onViewCandidate }
     <div className="grid-list-container">
       {candidates.map((candidate) => (
         <CandidateCard 
-          key={candidate.id} 
+          key={`candidate-${candidate.id}`} 
           candidate={candidate} 
           isAdmin={isAdmin}
           onEdit={onEditCandidate}

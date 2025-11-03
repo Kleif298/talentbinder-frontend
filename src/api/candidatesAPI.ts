@@ -5,7 +5,10 @@
 
 import type { Candidate, CandidateForm } from "../types/Candidate";
 
-const API_BASE = "https://talentbinder-backend.onrender.com/api/candidates";
+const API_BASE_ROOT = import.meta.env.VITE_API_URL || "";
+const API_BASE = API_BASE_ROOT
+  ? `${API_BASE_ROOT.replace(/\/$/, '')}/api/candidates`
+  : '/api/candidates';
 
 export const candidatesAPI = {
   /**
@@ -37,6 +40,10 @@ export const candidatesAPI = {
     }
 
     const data = await res.json();
+
+    console.log("Alle Kandidaten:", data);
+    console.log("Anzahl Kandidaten:", data.length);
+
     if (data.success && Array.isArray(data.candidates)) {
       return data.candidates as Candidate[];
     }
@@ -56,6 +63,9 @@ export const candidatesAPI = {
         lastName: candidate.last_name,
         email: candidate.email,
         status: candidate.status,
+        // send apprenticeshipId (legacy single) and apprenticeshipIds (array) so backend can persist associations
+        apprenticeshipId: candidate.apprenticeship_id,
+        apprenticeshipIds: candidate.apprenticeship_ids,
       }),
     });
 
@@ -90,6 +100,8 @@ export const candidatesAPI = {
         lastName: candidate.last_name,
         email: candidate.email,
         status: candidate.status,
+        apprenticeshipId: candidate.apprenticeship_id,
+        apprenticeshipIds: candidate.apprenticeship_ids,
       }),
     });
 
