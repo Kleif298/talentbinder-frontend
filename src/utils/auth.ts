@@ -6,7 +6,7 @@ interface UserData {
 }
 
 export function getUserData(): UserData | null {
-  const userStr = sessionStorage.getItem('user');
+  const userStr = localStorage.getItem('user'); // ✅ Changed from sessionStorage
   if (!userStr) return null;
   try {
     return JSON.parse(userStr);
@@ -24,7 +24,7 @@ export function handleAuthResponse(data: any) {
       role: data.account.role,
       isAdmin: data.account.role === 'berufsbilder'
     };
-    sessionStorage.setItem('user', JSON.stringify(userData));
+    localStorage.setItem('user', JSON.stringify(userData)); // ✅ Changed from sessionStorage
   }
 }
 

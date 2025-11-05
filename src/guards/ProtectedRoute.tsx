@@ -7,10 +7,16 @@ interface ProtectedRouteProps {
 }
 
 const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
-  if (!getUserData()) {
+  const user = getUserData();
+  console.log('🔒 ProtectedRoute - User data:', user); // ✅ Debug
+  
+  if (!user) {
+    console.log('❌ No user data - redirecting to /login');
     return <Navigate to="/login" replace />;
   }
-  return children;
+  
+  console.log('✅ User authenticated - rendering protected content');
+  return <>{children}</>;
 };
 
 export default ProtectedRoute;
