@@ -3,8 +3,15 @@ import MessageBanner from "~/components/MessageBanner/MessageBanner";
 import type { Message } from "~/components/MessageBanner/MessageBanner";
 import "./Login.scss";
 
-const API_URL = import.meta.env.VITE_API_URL || "";
+// Use VITE_API_URL only if explicitly set, otherwise use relative path for proxy
+const API_URL = import.meta.env.VITE_API_URL;
 const API_BASE = API_URL ? `${API_URL}/api` : '/api';
+
+console.log('🔧 API Configuration:', { 
+    VITE_API_URL: import.meta.env.VITE_API_URL,
+    API_BASE,
+    mode: import.meta.env.MODE 
+});
 
 const Login: React.FC = () => {
     const [email, setEmail] = useState("");
