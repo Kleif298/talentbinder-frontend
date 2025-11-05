@@ -20,13 +20,13 @@ export interface Candidate {
 
 export type CandidateForm = {
   id?: number;
-  first_name?: string;
-  last_name?: string;
+  firstName?: string;
+  lastName?: string;
   email?: string;
   status?: 'Favorit' | 'Normal' | 'Eliminiert';
   // support multiple apprenticeships on the form
-  apprenticeship_id?: number;
-  apprenticeship_ids?: number[];
+  apprenticeshipId?: number;
+  apprenticeshipIds?: number[];
 };
 
 export interface CandidateCardProps {

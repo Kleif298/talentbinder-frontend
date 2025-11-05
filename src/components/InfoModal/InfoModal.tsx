@@ -13,19 +13,19 @@ interface InfoModalProps {
 
 interface Recruiter {
   id: number;
-  first_name: string;
-  last_name: string;
+  firstName: string;
+  lastName: string;
   email: string;
 }
 
 interface Registration {
-  registration_id: number;
-  candidate_id: number;
-  first_name: string;
-  last_name: string;
+  registrationId: number;
+  candidateId: number;
+  firstName: string;
+  lastName: string;
   email: string;
   status: string;
-  registered_at: string;
+  registeredAt: string;
 }
 
 interface RegistrationStats {
@@ -35,8 +35,8 @@ interface RegistrationStats {
 
 interface Candidate {
   id: number;
-  first_name: string;
-  last_name: string;
+  firstName: string;
+  lastName: string;
   email: string;
 }
 
@@ -85,7 +85,7 @@ const InfoModal = ({ event, isOpen, onClose }: InfoModalProps) => {
       console.log('Current registration stats:', registrationStats);
       
       // Filter out already registered candidates
-      const registeredIds = registrationStats?.registrations.map(r => r.candidate_id) || [];
+      const registeredIds = registrationStats?.registrations.map(r => r.candidateId) || [];
       console.log('Registered candidate IDs:', registeredIds);
       
       const available = allCandidates.filter(c => !registeredIds.includes(c.id));
@@ -195,10 +195,10 @@ const InfoModal = ({ event, isOpen, onClose }: InfoModalProps) => {
                   {registrationStats && registrationStats.registrations.length > 0 ? (
                     <div className="candidate-list">
                       {registrationStats.registrations.map(registration => (
-                        <div key={registration.registration_id} className="candidate-item">
+                        <div key={registration.registrationId} className="candidate-item">
                           <div className="candidate-info">
                             <span className="candidate-name">
-                              {registration.first_name} {registration.last_name}
+                              {registration.firstName} {registration.lastName}
                             </span>
                             <span className="candidate-email">
                               {registration.email}
@@ -209,7 +209,7 @@ const InfoModal = ({ event, isOpen, onClose }: InfoModalProps) => {
                           </div>
                           <button 
                             className="btn-remove"
-                            onClick={() => handleRemoveCandidate(registration.candidate_id)}
+                            onClick={() => handleRemoveCandidate(registration.candidateId)}
                             title="Registrierung entfernen"
                           >
                             ×
@@ -236,7 +236,7 @@ const InfoModal = ({ event, isOpen, onClose }: InfoModalProps) => {
                               className="candidate-select-item"
                               onClick={() => handleAddCandidate(candidate.id)}
                             >
-                              <span>{candidate.first_name} {candidate.last_name}</span>
+                              <span>{candidate.firstName} {candidate.lastName}</span>
                               <span className="email-small">{candidate.email}</span>
                             </div>
                           ))
@@ -262,7 +262,7 @@ const InfoModal = ({ event, isOpen, onClose }: InfoModalProps) => {
                   {recruiters.map(recruiter => (
                     <div key={recruiter.id} className="recruiter-item">
                       <span className="recruiter-name">
-                        {recruiter.first_name} {recruiter.last_name}
+                        {recruiter.firstName} {recruiter.lastName}
                       </span>
                       <span className="recruiter-email">
                         {recruiter.email}

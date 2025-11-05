@@ -14,7 +14,7 @@ export const candidatesAPI = {
   /**
    * Abrufen aller Kandidaten mit Filtern und Sortierung
    */
-  getAll: async (search: string = "", status: string = "", sortBy: string = "created_at_desc"): Promise<Candidate[]> => {
+  getAll: async (search: string = "", status: string = "", sortBy: string = "createdAtDesc"): Promise<Candidate[]> => {
     const queryParams = new URLSearchParams();
     if (search) queryParams.append("search", search);
     if (status) queryParams.append("status", status);
@@ -59,13 +59,13 @@ export const candidatesAPI = {
       headers: { "Content-Type": "application/json" },
       credentials: "include",
       body: JSON.stringify({
-        firstName: candidate.first_name,
-        lastName: candidate.last_name,
+        firstName: candidate.firstName,
+        lastName: candidate.lastName,
         email: candidate.email,
         status: candidate.status,
         // send apprenticeshipId (legacy single) and apprenticeshipIds (array) so backend can persist associations
-        apprenticeshipId: candidate.apprenticeship_id,
-        apprenticeshipIds: candidate.apprenticeship_ids,
+        apprenticeshipId: candidate.apprenticeshipId,
+        apprenticeshipIds: candidate.apprenticeshipIds,
       }),
     });
 
@@ -96,12 +96,12 @@ export const candidatesAPI = {
       headers: { "Content-Type": "application/json" },
       credentials: "include",
       body: JSON.stringify({
-        firstName: candidate.first_name,
-        lastName: candidate.last_name,
+        firstName: candidate.firstName,
+        lastName: candidate.lastName,
         email: candidate.email,
         status: candidate.status,
-        apprenticeshipId: candidate.apprenticeship_id,
-        apprenticeshipIds: candidate.apprenticeship_ids,
+        apprenticeshipId: candidate.apprenticeshipId,
+        apprenticeshipIds: candidate.apprenticeshipIds,
       }),
     });
 
