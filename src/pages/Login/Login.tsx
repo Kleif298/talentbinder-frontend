@@ -3,6 +3,9 @@ import MessageBanner from "~/components/MessageBanner/MessageBanner";
 import type { Message } from "~/components/MessageBanner/MessageBanner";
 import "./Login.scss";
 
+const API_URL = import.meta.env.VITE_API_URL || "";
+const API_BASE = API_URL ? `${API_URL}/api` : '/api';
+
 const Login: React.FC = () => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
@@ -17,7 +20,7 @@ const Login: React.FC = () => {
         console.log('🔵 Login attempt:', { email }); // ✅ Debug log
 
         try {
-            const response = await fetch('/api/auth/login', {
+            const response = await fetch(`${API_BASE}/auth/login`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
