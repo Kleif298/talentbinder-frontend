@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { handleAuthResponse, getUserData } from "~/utils/auth";
 import MessageBanner from "~/components/MessageBanner/MessageBanner";
 import type { Message } from "~/components/MessageBanner/MessageBanner";
 import "./Login.scss";

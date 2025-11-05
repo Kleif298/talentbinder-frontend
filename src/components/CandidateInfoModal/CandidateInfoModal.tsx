@@ -21,7 +21,7 @@ const CandidateInfoModal = ({ candidate, isOpen, onClose }: CandidateInfoModalPr
                 </div>
                 <div className="info-modal-content">
                     <div className="section">
-                        <h3>{candidate.first_name} {candidate.last_name}</h3>
+                        <h3>{candidate.firstName} {candidate.lastName}</h3>
                         <div className="info-grid">
                             <span className="label">Email:</span>
                             <span className="value">{candidate.email}</span>
@@ -29,10 +29,12 @@ const CandidateInfoModal = ({ candidate, isOpen, onClose }: CandidateInfoModalPr
                             <span className="label">Status:</span>
                             <span className="value">{candidate.status}</span>
                             
-                            {candidate.apprenticeship && (
+                            {candidate.apprenticeships && candidate.apprenticeships.length > 0 && (
                                 <>
                                     <span className="label">Lehrstelle:</span>
-                                    <span className="value">{candidate.apprenticeship}</span>
+                                    <span className="value">
+                                        {candidate.apprenticeships.map(a => a.name).join(', ')}
+                                    </span>
                                 </>
                             )}
                             
