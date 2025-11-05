@@ -12,9 +12,9 @@ export function ModalCandidates({ candidateToEdit, onSave, onClose, onDelete, ap
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
   
-  // Lokaler State für das Formular (snake_case intern, um mit Backend kompatibel zu sein)
-  const [first_name, setFirstName] = useState("")
-  const [last_name, setLastName] = useState("")
+  // Local state for the form (using camelCase)
+  const [firstName, setFirstName] = useState("")
+  const [lastName, setLastName] = useState("")
   const [email, setEmail] = useState("")
   // Selected apprenticeships (IDs) and helper for the add-select
   const [selectedApprenticeships, setSelectedApprenticeships] = useState<number[]>([]);
@@ -66,7 +66,7 @@ export function ModalCandidates({ candidateToEdit, onSave, onClose, onDelete, ap
   const handleSave = async () => {
     setError("");
     
-    if (!email || !first_name) {
+    if (!email || !firstName) {
       setError("E-Mail und Vorname sind erforderlich");
       return;
     }
@@ -75,13 +75,13 @@ export function ModalCandidates({ candidateToEdit, onSave, onClose, onDelete, ap
 
     try {
       const candidate: CandidateForm = {
-        first_name,
-        last_name,
+        firstName,
+        lastName,
         email,
-        // Send both a primary apprenticeship_id for backward compatibility
-        // and apprenticeship_ids array for full persistence
-        apprenticeship_id: selectedApprenticeships[0] || undefined,
-        apprenticeship_ids: selectedApprenticeships.length > 0 ? selectedApprenticeships : undefined,
+        // Send both a primary apprenticeshipId for backward compatibility
+        // and apprenticeshipIds array for full persistence
+        apprenticeshipId: selectedApprenticeships[0] || undefined,
+        apprenticeshipIds: selectedApprenticeships.length > 0 ? selectedApprenticeships : undefined,
         status,
       }
       await onSave(candidate)
@@ -137,11 +137,11 @@ export function ModalCandidates({ candidateToEdit, onSave, onClose, onDelete, ap
                 <div className="name">
                   <div className="form-group">
                     <label htmlFor="firstName">Vorname</label>
-                    <input id="firstName" type="text" placeholder="Max" value={first_name} onChange={(e) => setFirstName(e.target.value)} required />
+                    <input id="firstName" type="text" placeholder="Max" value={firstName} onChange={(e) => setFirstName(e.target.value)} required />
                   </div>
                   <div className="form-group">
                     <label htmlFor="lastName">Nachname</label>
-                    <input id="lastName" type="text" placeholder="Mustermann" value={last_name} onChange={(e) => setLastName(e.target.value)} />
+                    <input id="lastName" type="text" placeholder="Mustermann" value={lastName} onChange={(e) => setLastName(e.target.value)} />
                   </div>
                 </div>
                 <div className="form-group">
