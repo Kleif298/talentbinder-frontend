@@ -31,8 +31,24 @@ const Login: React.FC = () => {
 
             console.log('🔵 Response status:', response.status); // ✅ Debug log
             console.log('🔵 Response ok:', response.ok); // ✅ Debug log
-
-            const data = await response.json();
+            console.log('🔵 Response headers:', response.headers); // ✅ Debug log
+            
+            // Check if response has content
+            const contentType = response.headers.get('content-type');
+            console.log('🔵 Content-Type:', contentType);
+            
+            if (!contentType || !contentType.includes('application/json')) {
+                throw new Error('Server returned non-JSON response');
+            }
+            
+            const text = await response.text();
+            console.log('🔵 Response text:', text); // ✅ Debug log
+            
+            if (!text) {
+                throw new Error('Empty response from server');
+            }
+            
+            const data = JSON.parse(text);
             console.log('🔵 Response data:', data); // ✅ Debug log
 
             if (response.ok && data.success) {
