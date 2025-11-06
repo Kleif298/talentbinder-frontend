@@ -9,12 +9,7 @@ dist-ssr/
 build/
 out/
 
-# environment
-.env
-.env.local
-.env.*.local
-*.local
-.env.production
+
 
 # logs
 logs/

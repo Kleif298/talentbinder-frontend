@@ -3,12 +3,18 @@ import MessageBanner from "~/components/MessageBanner/MessageBanner";
 import type { Message } from "~/components/MessageBanner/MessageBanner";
 import "./Login.scss";
 
-// Use VITE_API_URL only if explicitly set, otherwise use relative path for proxy
-const API_URL = import.meta.env.VITE_API_URL;
+// API Configuration
+// In production (on Render), use the backend URL
+// In development, use localhost or proxy
+const isDevelopment = import.meta.env.MODE === 'development';
+const API_URL = import.meta.env.VITE_API_URL || 
+    (!isDevelopment ? 'https://talentbinder-backend.onrender.com' : '');
 const API_BASE = API_URL ? `${API_URL}/api` : '/api';
 
 console.log('🔧 API Configuration:', { 
     VITE_API_URL: import.meta.env.VITE_API_URL,
+    isDevelopment,
+    calculatedApiUrl: API_URL,
     API_BASE,
     mode: import.meta.env.MODE 
 });
