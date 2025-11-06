@@ -8,7 +8,7 @@ The frontend needs the following environment variables set in Render:
 
 ```bash
 # Backend API URL (IMPORTANT!)
-VITE_API_URL=https://your-backend-app.onrender.com
+VITE_API_URL=https://talentbinder-backend.onrender.com
 
 # Optional: App Name
 VITE_APP_NAME=Talent Binder
@@ -24,6 +24,8 @@ Go to your frontend service → Environment → Add Environment Variables:
 Name: VITE_API_URL
 Value: https://talentbinder-backend.onrender.com
 ```
+
+**IMPORTANT**: After adding the environment variable, you MUST trigger a new deploy because Vite bundles environment variables at build time!
 
 ### 2. **Build Settings**
 
