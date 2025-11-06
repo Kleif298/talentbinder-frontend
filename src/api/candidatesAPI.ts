@@ -42,7 +42,7 @@ export const candidatesAPI = {
     const data = await res.json();
 
     console.log("Alle Kandidaten:", data);
-    console.log("Anzahl Kandidaten:", data.length);
+    console.log("Anzahl Kandidaten:", data.candidates?.length || 0);
 
     if (data.success && Array.isArray(data.candidates)) {
       return data.candidates as Candidate[];

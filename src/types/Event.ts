@@ -34,6 +34,7 @@ export interface EventCardProps {
   onEdit: (formData: Event) => void;
   onView: (event: Event) => void;
   registrationCount?: number;
+  onRefresh?: () => void;
 }
 
 export interface EventListProps {

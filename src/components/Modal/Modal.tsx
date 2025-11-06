@@ -66,8 +66,13 @@ export function ModalCandidates({ candidateToEdit, onSave, onClose, onDelete, ap
   const handleSave = async () => {
     setError("");
     
-    if (!email || !firstName) {
-      setError("E-Mail und Vorname sind erforderlich");
+    if (!firstName || !lastName) {
+      setError("Vor- und Nachname sind erforderlich");
+      return;
+    }
+
+    if (selectedApprenticeships.length === 0) {
+      setError("Bitte wählen Sie mindestens einen Lehrberuf aus");
       return;
     }
 
@@ -77,7 +82,7 @@ export function ModalCandidates({ candidateToEdit, onSave, onClose, onDelete, ap
       const candidate: CandidateForm = {
         firstName,
         lastName,
-        email,
+        email: email || undefined, // Optional email
         // Send both a primary apprenticeshipId for backward compatibility
         // and apprenticeshipIds array for full persistence
         apprenticeshipId: selectedApprenticeships[0] || undefined,
@@ -136,17 +141,17 @@ export function ModalCandidates({ candidateToEdit, onSave, onClose, onDelete, ap
               <form onSubmit={(e) => { e.preventDefault(); handleSave(); }}>
                 <div className="name">
                   <div className="form-group">
-                    <label htmlFor="firstName">Vorname</label>
+                    <label htmlFor="firstName">Vorname *</label>
                     <input id="firstName" type="text" placeholder="Max" value={firstName} onChange={(e) => setFirstName(e.target.value)} required />
                   </div>
                   <div className="form-group">
-                    <label htmlFor="lastName">Nachname</label>
-                    <input id="lastName" type="text" placeholder="Mustermann" value={lastName} onChange={(e) => setLastName(e.target.value)} />
+                    <label htmlFor="lastName">Nachname *</label>
+                    <input id="lastName" type="text" placeholder="Mustermann" value={lastName} onChange={(e) => setLastName(e.target.value)} required />
                   </div>
                 </div>
                 <div className="form-group">
-                  <label htmlFor="email">Email-Adresse</label>
-                  <input id="email" type="email" placeholder="max@example.com" value={email} onChange={(e) => setEmail(e.target.value)} required />
+                  <label htmlFor="email">Email-Adresse (optional)</label>
+                  <input id="email" type="email" placeholder="max@example.com" value={email} onChange={(e) => setEmail(e.target.value)} />
                 </div>
                 
                 {/* Status-Dropdown aktualisiert */}
@@ -160,7 +165,7 @@ export function ModalCandidates({ candidateToEdit, onSave, onClose, onDelete, ap
                 </div>
 
                 <div className="form-group">
-                  <label htmlFor="jobBranche">Lehrberuf</label>
+                  <label htmlFor="jobBranche">Lehrberuf *</label>
                   {apprenticeships.length > 0 ? (
                     <>
                       <div className="apprenticeship-add-group">

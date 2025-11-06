@@ -14,6 +14,7 @@ const Events = () => {
     const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
     const [refreshKey, setRefreshKey] = useState(0);
     const [message, setMessage] = useState<Message | null>(null);
+    const [searchTerm, setSearchTerm] = useState("");
 
     const handleCreateEvent = async (eventData: EventForm) => {
         try {
@@ -69,11 +70,13 @@ const Events = () => {
                 <div className="event-list-section">
                     <div className="head-of-list">
                         <div className="head-of-list-content">
-                            <select className="date-select">
-                                <option value="all">Alle</option>
-                                <option value="upcoming">Bevorstehend</option>
-                                <option value="past">Vergangenheit</option>
-                            </select>
+                            <input 
+                                className="event-search" 
+                                type="text" 
+                                placeholder="Nach Events suchen..."
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                            />
                             <EventModal 
                                 eventToEdit={eventToEdit} 
                                 onSave={eventToEdit ? handleEditEvent : handleCreateEvent}
@@ -84,6 +87,7 @@ const Events = () => {
                     </div>
                     <EventList 
                         refreshKey={refreshKey}
+                        searchTerm={searchTerm}
                         onEditStart={(event) => setEventToEdit(event)}
                         onViewStart={(event) => setSelectedEvent(event)}
                     />

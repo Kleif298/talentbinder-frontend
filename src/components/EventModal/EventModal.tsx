@@ -186,8 +186,8 @@ const EventModal = ({ eventToEdit, onSave, onClose, onDelete }: EventModalProps)
     setError("")
     setSuccess("")
 
-    if (!formData.title || !formData.description || !formData.startingAt) {
-      setError("Titel, Beschreibung und Startdatum sind erforderlich")
+    if (!formData.title || !formData.startingAt) {
+      setError("Titel und Startdatum sind erforderlich")
       return
     }
 
@@ -240,18 +240,27 @@ const EventModal = ({ eventToEdit, onSave, onClose, onDelete }: EventModalProps)
 
       let eventId: number | null = null;
 
-      if (onSave && eventToEdit) {
+      if (eventToEdit) {
         // Edit-Modus: Event existiert bereits
-        await onSave(eventDataToSend)
+        if (onSave) {
+          await onSave(eventDataToSend)
+        }
         eventId = eventToEdit.id
       } else {
         // Create-Modus: Event wird neu erstellt
-        const response = await eventsAPI.create(eventDataToSend)
-        eventId = response.id
+        if (onSave) {
+          await onSave(eventDataToSend);
+          // Im Create-Modus haben wir keine eventId zurück von onSave,
+          // daher können wir keine Recruiter hinzufügen
+          // Das muss in der Parent-Komponente gehandhabt werden
+        } else {
+          const response = await eventsAPI.create(eventDataToSend)
+          eventId = response.id
+        }
       }
 
-      // Wenn im Create-Modus und pending Recruiter existieren, füge sie hinzu
-      if (!eventToEdit && eventId && pendingRecruiters.length > 0) {
+      // Wenn im Create-Modus ohne onSave und pending Recruiter existieren, füge sie hinzu
+      if (!eventToEdit && !onSave && eventId && pendingRecruiters.length > 0) {
         for (const recruiterId of pendingRecruiters) {
           try {
             await recruitersAPI.addRecruiterToEvent(eventId, recruiterId);
@@ -334,7 +343,7 @@ const EventModal = ({ eventToEdit, onSave, onClose, onDelete }: EventModalProps)
                 </div>
 
                 <div className="form-group">
-                  <label htmlFor="description">Beschreibung *</label>
+                  <label htmlFor="description">Beschreibung</label>
                   <textarea
                     id="description"
                     name="description"
