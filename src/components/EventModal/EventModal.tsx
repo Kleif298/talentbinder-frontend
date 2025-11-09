@@ -319,7 +319,7 @@ const EventModal = ({ eventToEdit, onSave, onClose, onDelete }: EventModalProps)
 
       {isOpen && (
         <>
-          <div className="modal-overlay" onClick={handleClose} />
+          <div className="modal-overlay"/>
           <div className="modal">
             <div className="modal-header">
               <h2>{modalTitle}</h2>
