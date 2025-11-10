@@ -161,7 +161,7 @@ const Login: React.FC = () => {
 
                 <p className="login-description">
                     {loginMode === 'ldap' 
-                        ? 'Logge dich mit deiner Sunrise E-Mail und LDAP-Passwort ein (nur im Büronetzwerk verfügbar).'
+                        ? 'Logge dich mit deiner Sunrise E-Mail und Passwort ein (nur im Büronetzwerk verfügbar).'
                         : isRegistering
                         ? 'Erstellen Sie ein lokales Konto mit Ihrer Sunrise E-Mail.'
                         : 'Logge dich mit deiner Sunrise E-Mail und lokalem Passwort ein (funktioniert überall).'}
@@ -229,9 +229,7 @@ const Login: React.FC = () => {
                 {loginMode === 'local' && !isRegistering && (
                     <div className="login-hint">
                         <p>
-                            <strong>Hinweis:</strong> Wenn Sie noch kein lokales Passwort haben, 
-                            können Sie sich hier registrieren oder sich zuerst im Büronetzwerk 
-                            mit LDAP anmelden.
+                            <strong>Hinweis:</strong> 
                         </p>
                     </div>
                 )}
