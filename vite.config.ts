@@ -6,6 +6,12 @@ export default defineConfig({
   server: {
     port: 3022,
     host: true,
+    allowedHosts: [
+      'localhost',
+      '.onrender.com',
+      'talentbinder.sunrise-avengers.ch',
+      'talentbinder.lab.local.ch'
+    ],
     proxy: {
       '/api': {
         target: 'http://localhost:4000',
