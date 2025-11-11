@@ -11,6 +11,7 @@ out/
 
 # environment
 .env
+.env.dev
 .env.local
 .env.*.local
 *.local

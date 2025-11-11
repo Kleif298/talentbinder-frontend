@@ -18,7 +18,7 @@ const Login: React.FC = () => {
     const [password, setPassword] = useState("");
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState<Message | null>(null);
-    const [loginMode, setLoginMode] = useState<'ldap' | 'local'>('ldap');
+    const [loginMode, setLoginMode] = useState<'ldap' | 'local'>('local');
     const [ldapAvailable, setLdapAvailable] = useState<boolean | null>(null); // null = checking
     const [checkingLdap, setCheckingLdap] = useState(true);
 
@@ -29,10 +29,10 @@ const Login: React.FC = () => {
 
     /**
      * Check if LDAP server is reachable
-     * Shows warning if unavailable
+     * Auto-selects login mode based on availability
      */
     async function checkLdapStatus() {
-        console.log('🔍 Frontend: Checking LDAP server status...');
+        console.log('� Frontend: Checking LDAP server status...');
         setCheckingLdap(true);
         
         try {
@@ -46,21 +46,26 @@ const Login: React.FC = () => {
             
             setLdapAvailable(data.ldapAvailable);
             
-            if (!data.ldapAvailable) {
+            if (data.ldapAvailable) {
+                // LDAP is available - use it by default
+                setLoginMode('ldap');
+                console.log('✅ Frontend: LDAP server reachable, defaulting to LDAP login');
+            } else {
+                // LDAP unavailable - use local login
+                setLoginMode('local');
                 setMessage({
                     type: 'warning',
-                    text: 'LDAP-Server nicht erreichbar. Bitte verbinden Sie sich mit dem DAL-Netzwerk und laden Sie die Seite neu.',
+                    text: 'LDAP-Server nicht erreichbar. Bitte verbinden Sie sich mit dem DAL-Netzwerk oder nutzen Sie den lokalen Login.',
                     duration: 0
                 });
-                console.log('⚠️ Frontend: LDAP server unreachable');
-            } else {
-                console.log('✅ Frontend: LDAP server reachable');
+                console.log('⚠️ Frontend: LDAP server unreachable, defaulting to local login');
             }
         } catch (err) {
             console.error('❌ Frontend: Error checking LDAP status:', err);
             setLdapAvailable(false);
+            setLoginMode('local');
             setMessage({
-                type: 'error',
+                type: 'warning',
                 text: 'Verbindung zum Server fehlgeschlagen. Bitte versuchen Sie es später erneut.',
                 duration: 0
             });
@@ -74,7 +79,7 @@ const Login: React.FC = () => {
         setMessage(null);
         setLoading(true);
 
-        console.log('🔵 Frontend: Login attempt:', { email });
+        console.log('🔵 Frontend: Login attempt:', { email, loginMode });
 
         // Validate email domain
         if (!email.endsWith('@sunrise.net')) {
@@ -100,7 +105,7 @@ const Login: React.FC = () => {
                 body: JSON.stringify({ 
                     email,
                     password,
-                    preferredMethod: loginMode // Use selected login mode
+                    preferredMethod: loginMode
                 }),
             });
 
@@ -156,47 +161,50 @@ const Login: React.FC = () => {
             {message && <MessageBanner message={message} />}
             <div className="login-container">
                 <h2>Login</h2>
-
-                {/* Login Status */}
-                {loginMode === 'ldap' ? 
-                    checkingLdap ? (
-                        <p className="login-status">
-                            🔄 Prüfe LDAP-Server Erreichbarkeit...
-                        </p>) 
-                        : ldapAvailable ? (
-                            <p className="login-status">
-                                Melde dich mit deiner Sunrise E-Mail und Passwort an.
-                            </p>
-                            ) : (
-                            <p className="login-warning">
-                                ❌ LDAP-Server nicht erreichbar. Melde dich lokal an oder verbinde dich mit dem DAL-Netzwerk.
-                            </p>
-                        )
-                    : 
-                    <p className="login-status">
-                        Melden Sie sich mit Ihrer E-Mail und lokalem Passwort an.
-                    </p>
-                }
-
-                {/* Mode Switcher */}
+                
+                {/* Login Mode Switcher */}
                 <div className="login-mode-switcher">
                     <button
                         type="button"
                         className={`mode-button ${loginMode === 'ldap' ? 'active' : ''}`}
-                        onClick={() => setLoginMode('ldap')}
-                        disabled={loading}
+                        onClick={() => {
+                            if (ldapAvailable) {
+                                setLoginMode('ldap');
+                                setMessage(null);
+                            }
+                        }}
+                        disabled={checkingLdap || !ldapAvailable}
+                        title={!ldapAvailable ? 'LDAP-Server nicht erreichbar' : ''}
                     >
-                        LDAP {ldapAvailable === false && '❌'}
+                        🏢 LDAP (Büronetzwerk)
+                        {ldapAvailable === false && ' ❌'}
                     </button>
                     <button
                         type="button"
                         className={`mode-button ${loginMode === 'local' ? 'active' : ''}`}
-                        onClick={() => setLoginMode('local')}
-                        disabled={loading}
+                        onClick={() => {
+                            setLoginMode('local');
+                            setMessage(null);
+                        }}
+                        disabled={checkingLdap}
                     >
-                        Lokal
+                        🌐 Lokal (Remote)
                     </button>
                 </div>
+
+                {/* Status indicator */}
+                {checkingLdap && (
+                    <p className="login-status">
+                        🔄 Prüfe LDAP-Server Erreichbarkeit...
+                    </p>
+                )}
+
+                {/* Login description */}
+                <p className="login-description">
+                    {loginMode === 'ldap' 
+                        ? 'Melden Sie sich mit Ihrer Sunrise E-Mail und LDAP-Passwort an (nur im DAL-Büronetzwerk verfügbar).'
+                        : 'Melden Sie sich mit Ihrer Sunrise E-Mail und lokalem Passwort an (funktioniert überall).'}
+                </p>
 
                 <form onSubmit={handleSubmit} className="login-form">
                     <input
@@ -206,37 +214,40 @@ const Login: React.FC = () => {
                         placeholder="E-Mail (@sunrise.net)"
                         onChange={(e) => setEmail(e.target.value)}
                         required
-                        disabled={checkingLdap || loading || (loginMode === 'ldap' && ldapAvailable === false)}
+                        disabled={checkingLdap || loading}
                     />
                     <input
                         type="password"
                         id="password"
                         value={password}
-                        placeholder={loginMode === 'ldap' ? 'LDAP-Passwort' : 'Lokales Passwort'}
+                        placeholder={
+                            loginMode === 'ldap' 
+                                ? 'LDAP-Passwort' 
+                                : 'Lokales Passwort'
+                        }
                         onChange={(e) => setPassword(e.target.value)}
                         required
-                        disabled={checkingLdap || loading || (loginMode === 'ldap' && ldapAvailable === false)}
+                        disabled={checkingLdap || loading}
                     />
                     <button 
                         type="submit" 
-                        disabled={checkingLdap || loading || (loginMode === 'ldap' && ldapAvailable === false)} 
+                        disabled={checkingLdap || loading} 
                         className="submit-button"
                     >
                         {checkingLdap 
                             ? 'Initialisiere...' 
-                            : (loginMode === 'ldap' && ldapAvailable === false)
-                            ? 'LDAP-Server nicht erreichbar'
                             : loading 
                             ? 'Einloggen...' 
                             : 'Einloggen'}
                     </button>
                 </form>
 
-                {/* Info message about account creation */}
-                {!checkingLdap && ldapAvailable && loginMode === 'ldap' && (
+                {/* Info message about local login */}
+                {loginMode === 'local' && !checkingLdap && (
                     <div className="login-info">
                         <p>
-                            💡 <strong>Hinweis:</strong> Beim ersten LDAP-Login wird automatisch ein Konto erstellt.
+                            💡 <strong>Hinweis:</strong> Lokale Benutzer müssen vom Administrator erstellt werden. 
+                            LDAP-Benutzer werden beim ersten Login automatisch angelegt.
                         </p>
                     </div>
                 )}
