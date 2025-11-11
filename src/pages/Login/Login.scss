@@ -287,4 +287,15 @@
   color: #2563eb;
   text-decoration: underline;
 }
+
+.registration-link {
+  color: #3182ce;
+  cursor: pointer;
+  text-decoration: underline;
+  font-weight: 500;
+  
+  &:hover {
+    color: #2563eb;
+  }
+}
 */

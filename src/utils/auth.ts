@@ -1,35 +1,77 @@
+const API_URL = import.meta.env.VITE_API_URL;
+const API_BASE = API_URL ? `${API_URL}/api` : '/api';
+
 interface UserData {
   id: number;
   email: string;
+  name: string;
   role: string;
   isAdmin: boolean;
 }
 
-export function getUserData(): UserData | null {
-  const userStr = localStorage.getItem('user'); // ✅ Changed from sessionStorage
-  if (!userStr) return null;
-  try {
-    return JSON.parse(userStr);
-  } catch (error) {
-    console.error("Ungültige User-Daten:", error);
-    return null;
-  }
+// In-memory cache for user data (to avoid excessive API calls)
+let cachedUser: UserData | null = null;
+let userFetchPromise: Promise<UserData | null> | null = null;
+
+/**
+ * Fetch current user from backend (reads JWT from httpOnly cookie)
+ */
+export async function getUserData(): Promise<UserData | null> {
+  // Return cached user if available
+  if (cachedUser) return cachedUser;
+  
+  // If a fetch is already in progress, wait for it
+  if (userFetchPromise) return userFetchPromise;
+  
+  // Start new fetch
+  userFetchPromise = (async () => {
+    try {
+      const response = await fetch(`${API_BASE}/auth/me`, {
+        credentials: 'include'
+      });
+      
+      if (!response.ok) {
+        cachedUser = null;
+        return null;
+      }
+      
+      const data = await response.json();
+      if (data.success && data.user) {
+        cachedUser = data.user;
+        return cachedUser;
+      }
+      
+      cachedUser = null;
+      return null;
+    } catch (error) {
+      console.error("Error fetching user data:", error);
+      cachedUser = null;
+      return null;
+    } finally {
+      userFetchPromise = null;
+    }
+  })();
+  
+  return userFetchPromise;
 }
 
-export function handleAuthResponse(data: any) {
-  if (data.success && data.account) {
-    const userData: UserData = {
-      id: data.account.id,
-      email: data.account.email,
-      role: data.account.role,
-      isAdmin: data.account.role === 'berufsbilder'
-    };
-    localStorage.setItem('user', JSON.stringify(userData)); // ✅ Changed from sessionStorage
-  }
+/**
+ * Clear cached user data (call after logout)
+ */
+export function clearUserCache(): void {
+  cachedUser = null;
+  userFetchPromise = null;
 }
 
-export function isOwnerOfEvent(eventCreatorId: number): boolean {
-  const userData = getUserData();
+/**
+ * Update cached user data after login
+ */
+export function setCachedUser(user: UserData): void {
+  cachedUser = user;
+}
+
+export async function isOwnerOfEvent(eventCreatorId: number): Promise<boolean> {
+  const userData = await getUserData();
   if (!userData) return false;
   
   if (userData.isAdmin) return true;
@@ -37,22 +79,22 @@ export function isOwnerOfEvent(eventCreatorId: number): boolean {
   return userData.id === eventCreatorId;
 }
 
-export function getAdminStatus(): boolean {
-  const userData = getUserData();
+export async function getAdminStatus(): Promise<boolean> {
+  const userData = await getUserData();
   return userData?.isAdmin === true;
 }
 
-export function getAccountId(): number | null {
-  const userData = getUserData();
+export async function getAccountId(): Promise<number | null> {
+  const userData = await getUserData();
   return userData?.id || null;
 }
 
-export function getAccountEmail(): string | null {
-  const userData = getUserData();
+export async function getAccountEmail(): Promise<string | null> {
+  const userData = await getUserData();
   return userData?.email || null;
 }
 
-export function getAccountRole(): string | null {
-  const userData = getUserData();
+export async function getAccountRole(): Promise<string | null> {
+  const userData = await getUserData();
   return userData?.role || null;
 }

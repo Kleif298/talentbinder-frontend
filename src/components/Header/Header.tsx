@@ -1,15 +1,26 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import "./Header.scss";
-import { getAccountEmail, getAdminStatus } from "~/utils/auth.ts";
+import { getAccountEmail, getAdminStatus, clearUserCache } from "~/utils/auth.ts";
 import { MdHistory } from "react-icons/md";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 const Header = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const isActive = (path: string) => location.pathname === path;
-  const isAdmin = getAdminStatus();
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [email, setEmail] = useState("");
   const [loggingOut, setLoggingOut] = useState(false);
+
+  useEffect(() => {
+    const loadUserData = async () => {
+      const adminStatus = await getAdminStatus();
+      const userEmail = await getAccountEmail();
+      setIsAdmin(adminStatus);
+      setEmail(userEmail || "");
+    };
+    loadUserData();
+  }, []);
 
   const handleLogout = async () => {
     if (loggingOut) return;
@@ -28,7 +39,7 @@ const Header = () => {
     } catch (error) {
       console.error('Logout error:', error);
     } finally {
-      localStorage.removeItem("user");
+      clearUserCache();
       setLoggingOut(false);
       navigate('/login');
     }
@@ -41,7 +52,7 @@ const Header = () => {
         <h1 className="header-title">TalentBinder</h1>
         <div className="user-data">
           {isAdmin ? <p className="admin-state">Admin</p> : null}
-          <div className="email-holder">{getAccountEmail()}</div>
+          <div className="email-holder">{email}</div>
           <button className="logout-button" onClick={handleLogout} disabled={loggingOut}>
             Logout
           </button>

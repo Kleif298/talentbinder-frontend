@@ -1,7 +1,11 @@
 import { useState, useEffect } from "react";
 import MessageBanner from "~/components/MessageBanner/MessageBanner";
 import type { Message } from "~/components/MessageBanner/MessageBanner";
+import { setCachedUser } from "~/utils/auth.ts";
+import { useNavigate } from 'react-router-dom';
 import "./Login.scss";
+
+
 
 // Use VITE_API_URL only if explicitly set, otherwise use relative path for proxy
 const API_URL = import.meta.env.VITE_API_URL;
@@ -21,6 +25,7 @@ const Login: React.FC = () => {
     const [loginMode, setLoginMode] = useState<'ldap' | 'local'>('ldap');
     const [ldapAvailable, setLdapAvailable] = useState<boolean | null>(null); // null = checking
     const [checkingLdap, setCheckingLdap] = useState(true);
+    const navigate = useNavigate();
 
     // Check LDAP status on component mount
     useEffect(() => {
@@ -124,9 +129,8 @@ const Login: React.FC = () => {
                 console.log('✅ Frontend: Login successful!');
                 console.log('🔵 Frontend: User data:', data.user);
                 
-                // Store user data and redirect
-                localStorage.setItem('user', JSON.stringify(data.user));
-                localStorage.setItem('token', data.token);
+                // Cache user data (cookie is automatically set by backend)
+                setCachedUser(data.user);
                 
                 const targetPath = data.user.isAdmin ? '/candidates' : '/events';
                 console.log('🔵 Frontend: Redirecting to:', targetPath);
@@ -151,7 +155,10 @@ const Login: React.FC = () => {
         }
     };
 
+    // navigation-based registration (navigates to /register and passes current email via location.state)
+
     return (
+
         <div className="login-page">
             {message && <MessageBanner message={message} />}
             <div className="login-container">
@@ -233,10 +240,16 @@ const Login: React.FC = () => {
                 </form>
 
                 {/* Info message about account creation */}
-                {!checkingLdap && ldapAvailable && loginMode === 'ldap' && (
+                {!checkingLdap && ldapAvailable && (
                     <div className="login-info">
                         <p>
-                            💡 <strong>Hinweis:</strong> Beim ersten LDAP-Login wird automatisch ein Konto erstellt.
+                            💡 <strong>Noch kein Account?</strong>{" "}
+                            <span 
+                                className="registration-link"
+                                onClick={() => navigate('/register', { state: { initialEmail: email } })}
+                            >
+                                Registriere dich hier.
+                            </span>
                         </p>
                     </div>
                 )}
