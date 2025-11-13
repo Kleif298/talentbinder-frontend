@@ -76,7 +76,8 @@
 }
 
 .edit-button-icon,
-.info-button-icon {
+.info-button-icon,
+.report-button-icon {
     background: vars.$grey-100;
     border: none;
     border-radius: 8px;
@@ -365,10 +366,17 @@
     display: flex;
     flex-direction: column;
     gap: 4px;
+    color: vars.$grey-900;
+
+    
 
     &:hover {
         background: vars.$primary-color;
         color: white;
+
+        .candidate-name {
+            color: white;
+        }
 
         .candidate-email {
             color: rgba(255, 255, 255, 0.9);
@@ -385,6 +393,10 @@
 .candidate-email {
     font-size: 0.75rem;
     color: vars.$grey-500;
+
+    .candidate-dropdown-item:hover & {
+        color: rgba(255, 255, 255, 0.9);
+    }
 }
 
 .loading-state,

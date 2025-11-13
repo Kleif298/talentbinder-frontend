@@ -14,6 +14,29 @@ export interface Branch {
   name: string;
 }
 
+export interface Location {
+  locationId: number;
+  name: string;
+  address: string;
+  city: string;
+  plz: string;
+}
+
+export interface EventType {
+  templateId: number;
+  title: string;
+  description?: string;
+  locationId: number;
+  registrationsRequired: boolean;
+  startingAt?: string;
+  endingAt?: string;
+  multipleSessions: boolean;
+  locationName?: string;
+  locationAddress?: string;
+  locationCity?: string;
+  locationPlz?: string;
+}
+
 const API_ROOT = import.meta.env.VITE_API_URL || "";
 const API_BASE = API_ROOT ? `${API_ROOT.replace(/\/$/, '')}/api/lookups` : '/api/lookups';
 
@@ -112,5 +135,65 @@ export const lookupAPI = {
     } catch {
       return "Fehler beim Laden";
     }
+  },
+
+  /**
+   * Abrufen aller Standorte
+   */
+  getLocations: async (): Promise<Location[]> => {
+    const res = await fetch(`${API_BASE}/locations`, { credentials: "include" });
+
+    if (!res.ok) {
+      let errorData;
+      try {
+        const errorText = await res.text();
+        errorData = JSON.parse(errorText);
+      } catch (e) {
+        throw new Error(`Server error: ${res.statusText} (Status: ${res.status})`);
+      }
+      
+      if (res.status === 401) {
+        throw new Error("Bitte melden Sie sich an, um fortzufahren.");
+      } else if (res.status === 403) {
+        throw new Error("Sie haben keine Berechtigung für diese Aktion.");
+      }
+      throw new Error(errorData.message || "Server error: " + res.statusText);
+    }
+
+    const data = await res.json();
+    if (data.success && Array.isArray(data.locations)) {
+      return data.locations as Location[];
+    }
+    throw new Error(data.message || "Fehler beim Abrufen der Standorte");
+  },
+
+  /**
+   * Abrufen aller Event-Typen/Templates
+   */
+  getEventTypes: async (): Promise<EventType[]> => {
+    const res = await fetch(`${API_BASE}/event-types`, { credentials: "include" });
+
+    if (!res.ok) {
+      let errorData;
+      try {
+        const errorText = await res.text();
+        errorData = JSON.parse(errorText);
+      } catch (e) {
+        throw new Error(`Server error: ${res.statusText} (Status: ${res.status})`);
+      }
+      
+      if (res.status === 401) {
+        throw new Error("Bitte melden Sie sich an, um fortzufahren.");
+      } else if (res.status === 403) {
+        throw new Error("Sie haben keine Berechtigung für diese Aktion.");
+      }
+      throw new Error(errorData.message || "Server error: " + res.statusText);
+    }
+
+    const data = await res.json();
+    if (data.success && Array.isArray(data.eventTypes)) {
+      return data.eventTypes as EventType[];
+    }
+    throw new Error(data.message || "Fehler beim Abrufen der Event-Typen");
   },
 };

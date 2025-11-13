@@ -164,9 +164,10 @@ export function ModalCandidates({ candidateToEdit, onSave, onClose, onDelete, ap
                   </select>
                 </div>
 
+                {/* Lehrberuf-Sektion */}
                 <div className="form-group">
                   <label htmlFor="jobBranche">Lehrberuf *</label>
-                  {apprenticeships.length > 0 ? (
+                  {apprenticeships && apprenticeships.length > 0 ? (
                     <>
                       <div className="apprenticeship-add-group">
                         <select
@@ -176,7 +177,9 @@ export function ModalCandidates({ candidateToEdit, onSave, onClose, onDelete, ap
                         >
                           <option value="">-- Wählen Sie einen Lehrberuf --</option>
                           {apprenticeships.map((app: any) => (
-                            <option key={app.id} value={app.id}>{app.name}</option>
+                            <option key={app.id} value={app.id}>
+                              {app.name || `Beruf ${app.id}`}
+                            </option>
                           ))}
                         </select>
                         <button type="button" className="btn btn-secondary" onClick={handleAddApprenticeship} disabled={!selectedApprenticeshipToAdd}>
@@ -191,7 +194,7 @@ export function ModalCandidates({ candidateToEdit, onSave, onClose, onDelete, ap
                             const app = apprenticeships.find((a: any) => a.id === id);
                             return app ? (
                               <li key={id} className="apprenticeship-item">
-                                <span>{app.name}</span>
+                                <span>{app.name || `Beruf ${app.id}`}</span>
                                 <button type="button" className="btn btn-small btn-danger" onClick={() => handleRemoveApprenticeship(id)}>Entfernen</button>
                               </li>
                             ) : null;
@@ -200,13 +203,9 @@ export function ModalCandidates({ candidateToEdit, onSave, onClose, onDelete, ap
                       )}
                     </>
                   ) : (
-                    <input 
-                      id="jobBranche" 
-                      type="number" 
-                      placeholder="z.B. 1" 
-                      value={selectedApprenticeships[0] || ''} 
-                      onChange={(e) => setSelectedApprenticeships(e.target.value ? [parseInt(e.target.value)] : [])} 
-                    />
+                    <div className="alert alert-warning">
+                      <p>Lehrstellen werden geladen...</p>
+                    </div>
                   )}
                 </div>
 

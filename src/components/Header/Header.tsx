@@ -64,6 +64,9 @@ const Header = () => {
         </div>
       </div>
       <nav>
+        <a href="/reports" className={isActive("/reports") ? "active" : ""}>
+          Reports
+        </a>
         <a href="/events" className={isActive("/events") ? "active" : ""}>
           Events
         </a>

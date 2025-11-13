@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import "~/components/EventCard/EventCard.scss";
 import type { EventCardProps } from "../../types/Event";
 import { FaRegCalendarAlt, FaRegClock, FaUserCheck, FaCalendarCheck, FaUserPlus } from 'react-icons/fa';
@@ -20,17 +20,33 @@ interface RegisteredCandidate {
     email: string;
 }
 
-const EventCard = ({ event, onEdit, onView, registrationCount = 0, onRefresh }: EventCardProps) => {
-    const isAdmin = getAdminStatus();
+interface CardState {
+    isOwner: boolean;
+    isAdmin: boolean;
+    canEdit: boolean;
+    showAddCandidate: boolean;
+    showRegisteredCandidates: boolean;
+    registeredCandidates: RegisteredCandidate[];
+    availableCandidates: Candidate[];
+    loading: boolean;
+    loadingOwner: boolean;
+}
+
+const EventCard = ({ event, onEdit, onView, registrationCount = 0, onRefresh, readonly = false, onReport }: EventCardProps) => {
     const currentUserId = getAccountId();
-    const canEdit = isAdmin || event.createdByAccountId === currentUserId;
-    const isOwner = isOwnerOfEvent(event.createdByAccountId);
     
-    const [showAddCandidate, setShowAddCandidate] = useState(false);
-    const [showRegisteredCandidates, setShowRegisteredCandidates] = useState(false);
-    const [availableCandidates, setAvailableCandidates] = useState<Candidate[]>([]);
-    const [registeredCandidates, setRegisteredCandidates] = useState<RegisteredCandidate[]>([]);
-    const [loading, setLoading] = useState(false);
+    // Consolidated state
+    const [state, setState] = useState<CardState>({
+        isOwner: false,
+        isAdmin: false,
+        canEdit: false,
+        showAddCandidate: false,
+        showRegisteredCandidates: false,
+        registeredCandidates: [],
+        availableCandidates: [],
+        loading: false,
+        loadingOwner: true
+    });
 
     const formatDateTime = (dateString: string) => {
         const date = new Date(dateString);
@@ -50,74 +66,117 @@ const EventCard = ({ event, onEdit, onView, registrationCount = 0, onRefresh }: 
     const startDateTime = formatDateTime(event.startingAt);
     const isUpcoming = new Date(event.startingAt) > new Date();
 
-    // Lade registrierte Kandidaten wenn Owner
-    useEffect(() => {
-        if (isOwner && event.id) {
-            loadRegisteredCandidates();
-        }
-    }, [event.id, isOwner]);
-
-    const loadRegisteredCandidates = async () => {
+    const loadRegisteredCandidates = useCallback(async () => {
         try {
             const registrations = await recruitersAPI.getEventRegistrations(event.id);
-            console.log('Event ID:', event.id);
-            console.log('Raw registrations:', registrations);
-            console.log('Registrations array:', registrations.registrations);
+            console.log('Registrations API response:', registrations);
             
-            const registered = registrations.registrations.map((r: any) => {
-                console.log('Processing registration:', r);
+            const registered = (registrations.registrations || []).map((r: any) => {
+                console.log('Mapping registration:', r);
                 return {
-                    candidateId: r.candidateId,
-                    firstName: r.firstName,
-                    lastName: r.lastName,
+                    candidateId: r.candidateId || r.candidate_id,
+                    firstName: r.firstName || r.first_name,
+                    lastName: r.lastName || r.last_name,
                     email: r.email
                 };
             });
-            console.log('Processed registered candidates:', registered);
-            setRegisteredCandidates(registered);
+            
+            console.log('Registered candidates after mapping:', registered);
+            
+            setState(prev => ({
+                ...prev,
+                registeredCandidates: registered
+            }));
         } catch (err) {
             console.error('Fehler beim Laden der Registrierungen:', err);
         }
-    };
+    }, [event.id]);
 
-    const loadAvailableCandidates = async () => {
-        setLoading(true);
+    // Initialize ownership and permissions on mount
+    useEffect(() => {
+        const checkPermissions = async () => {
+            try {
+                const isAdminUser = await getAdminStatus();
+                const ownerStatus = await isOwnerOfEvent(event.createdByAccountId);
+                const canEditEvent = isAdminUser || (currentUserId && event.createdByAccountId && Number(event.createdByAccountId) === Number(currentUserId));
+                
+                setState(prev => ({
+                    ...prev,
+                    isAdmin: isAdminUser,
+                    isOwner: ownerStatus,
+                    canEdit: canEditEvent || isAdminUser,
+                    loadingOwner: false
+                }));
+
+                // Load registered candidates if owner
+                if (ownerStatus && event.id) {
+                    loadRegisteredCandidates();
+                }
+            } catch (err) {
+                console.error('Error checking permissions:', err);
+                setState(prev => ({ ...prev, loadingOwner: false }));
+            }
+        };
+
+        checkPermissions();
+    }, [event.id, event.createdByAccountId, loadRegisteredCandidates]);
+
+    const loadAvailableCandidates = useCallback(async () => {
+        setState(prev => ({ ...prev, loading: true }));
         try {
             const allCandidates = await candidatesAPI.getAll();
-            const registeredIds = registeredCandidates.map(r => r.candidateId);
+            const registeredIds = state.registeredCandidates.map(r => r.candidateId);
             const available = allCandidates.filter(c => !registeredIds.includes(c.id));
-            setAvailableCandidates(available);
+            
+            console.log('Available candidates:', available);
+
+            setState(prev => ({
+                ...prev,
+                availableCandidates: available,
+                loading: false
+            }));
         } catch (err) {
             console.error('Fehler beim Laden der Kandidaten:', err);
-            setAvailableCandidates([]);
-        } finally {
-            setLoading(false);
+            setState(prev => ({
+                ...prev,
+                availableCandidates: [],
+                loading: false
+            }));
         }
-    };
+    }, [state.registeredCandidates]);
 
-    const handleShowAddCandidate = () => {
+    const handleShowAddCandidate = useCallback(() => {
         loadAvailableCandidates();
-        setShowAddCandidate(true);
-    };
+        setState(prev => ({ ...prev, showAddCandidate: true }));
+    }, [state.registeredCandidates, loadAvailableCandidates]);
 
-    const handleAddCandidate = async (candidateId: number) => {
+    const handleAddCandidate = useCallback(async (candidateId: number) => {
         try {
             await recruitersAPI.addCandidateToEvent(event.id, candidateId);
             await loadRegisteredCandidates();
-            setShowAddCandidate(false);
-            // Trigger refresh in parent component
+            setState(prev => ({ ...prev, showAddCandidate: false }));
             if (onRefresh) {
                 onRefresh();
             }
         } catch (err: any) {
             alert(`Fehler: ${err.message}`);
         }
-    };
+    }, [event.id, onRefresh, loadRegisteredCandidates]);
 
-    const handleCancelAddCandidate = () => {
-        setShowAddCandidate(false);
-        setAvailableCandidates([]);
-    };
+    const handleCancelAddCandidate = useCallback(() => {
+        setState(prev => ({
+            ...prev,
+            showAddCandidate: false,
+            availableCandidates: []
+        }));
+    }, []);
+
+    const toggleCandidatesView = useCallback(() => {
+        setState(prev => ({
+            ...prev,
+            showRegisteredCandidates: !prev.showRegisteredCandidates
+        }));
+    }, []);
 
     return (
         <div className="event-card">
@@ -128,7 +187,7 @@ const EventCard = ({ event, onEdit, onView, registrationCount = 0, onRefresh }: 
                         {isUpcoming && <span className="event-badge upcoming">Bevorstehend</span>}
                     </div>
                     <div className="header-buttons">
-                        {canEdit && (
+                        {!readonly && state.canEdit && (
                             <button 
                                 className="edit-button-icon" 
                                 onClick={(e) => {
@@ -138,6 +197,18 @@ const EventCard = ({ event, onEdit, onView, registrationCount = 0, onRefresh }: 
                                 aria-label="Bearbeiten"
                             >
                                 ✏️
+                            </button>
+                        )}
+                        {readonly && onReport && (
+                            <button 
+                                className="report-button-icon" 
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    onReport(event);
+                                }}
+                                aria-label="Report erstellen"
+                            >
+                                📋
                             </button>
                         )}
                         <button 
@@ -161,15 +232,19 @@ const EventCard = ({ event, onEdit, onView, registrationCount = 0, onRefresh }: 
                         <div className="meta-content">
                             <span className="meta-label">Datum & Zeit</span>
                             <span className="meta-value">{startDateTime.date} • {startDateTime.time}</span>
+                            {/*{event.endingAt && (
+                                <span className="meta-value">{new Date(event.endingAt).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })}</span>
+                            )*/}
+                            {/*TODO: Redisign ending time display.Adjust to session logic*/}
                         </div>
                     </div>
                     
-                    {event.duration && (
+                    {event.endingAt && (
                         <div className="meta-item">
                             <FaRegClock className="meta-icon" />
                             <div className="meta-content">
-                                <span className="meta-label">Dauer</span>
-                                <span className="meta-value">{String(event.duration)}</span>
+                                <span className="meta-label">Endet</span>
+                                <span className="meta-value">{new Date(event.endingAt).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })}</span>
                             </div>
                         </div>
                     )}
@@ -195,31 +270,22 @@ const EventCard = ({ event, onEdit, onView, registrationCount = 0, onRefresh }: 
                     )}
                 </div>
 
-                <div className="event-footer">
-                    <span className="event-creator">
-                        {event.createdByFirstName} {event.createdByLastName}
-                    </span>
-                    <span className="event-date">
-                        {new Date(event.createdAt).toLocaleDateString('de-DE')}
-                    </span>
-                </div>
-
-                {/* Registrierte Kandidaten anzeigen - nur für Owner */}
-                {isOwner && registeredCandidates.length > 0 && (
+                {/* Registrierte Kandidaten anzeigen - nur für Owner (und nicht im readonly-Modus) */}
+                {!readonly && state.isOwner && state.registeredCandidates.length > 0 && (
                     <div className="registered-candidates-section">
                         <div className="registered-candidates-header">
-                            <h4>Registrierte Kandidaten ({registeredCandidates.length})</h4>
+                            <h4>Registrierte Kandidaten ({state.registeredCandidates.length})</h4>
                             <button 
                                 className="toggle-candidates-btn" 
-                                onClick={() => setShowRegisteredCandidates(!showRegisteredCandidates)}
+                                onClick={toggleCandidatesView}
                             >
-                                {showRegisteredCandidates ? '▼' : '▶'}
+                                {state.showRegisteredCandidates ? '▼' : '▶'}
                             </button>
                         </div>
-                        {showRegisteredCandidates && (
+                        {state.showRegisteredCandidates && (
                             <div className="registered-candidates-list">
-                                {registeredCandidates.map((candidate) => (
-                                    <div key={candidate.candidateId} className="registered-candidate-item">
+                                {state.registeredCandidates.map((candidate: RegisteredCandidate, index: number) => (
+                                    <div key={`registered-${candidate.candidateId}-${index}`} className="registered-candidate-item">
                                         {candidate.firstName} {candidate.lastName}
                                     </div>
                                 ))}
@@ -228,8 +294,8 @@ const EventCard = ({ event, onEdit, onView, registrationCount = 0, onRefresh }: 
                     </div>
                 )}
 
-                {/* Kandidaten hinzufügen Section - nur für Owner */}
-                {isOwner && !showAddCandidate && (
+                {/* Kandidaten hinzufügen Section - nur für Owner (und nicht im readonly-Modus) */}
+                {!readonly && state.isOwner && !state.showAddCandidate && (
                     <div className="add-candidate-footer">
                         <button 
                             className="btn-add-candidate-card" 
@@ -240,8 +306,8 @@ const EventCard = ({ event, onEdit, onView, registrationCount = 0, onRefresh }: 
                     </div>
                 )}
 
-                {/* Kandidaten-Auswahl Dropdown */}
-                {isOwner && showAddCandidate && (
+                {/* Kandidaten-Auswahl Dropdown (nur nicht im readonly-Modus) */}
+                {!readonly && state.isOwner && state.showAddCandidate && (
                     <div className="candidate-dropdown">
                         <div className="candidate-dropdown-header">
                             <h4>Kandidat auswählen</h4>
@@ -253,12 +319,12 @@ const EventCard = ({ event, onEdit, onView, registrationCount = 0, onRefresh }: 
                             </button>
                         </div>
                         <div className="candidate-dropdown-list">
-                            {loading ? (
+                            {state.loading ? (
                                 <div className="loading-state">Lade Kandidaten...</div>
-                            ) : availableCandidates.length > 0 ? (
-                                availableCandidates.map((candidate) => (
+                            ) : state.availableCandidates.length > 0 ? (
+                                state.availableCandidates.map((candidate: Candidate, index: number) => (
                                     <div 
-                                        key={candidate.id} 
+                                        key={`${candidate.id}-${index}`}
                                         className="candidate-dropdown-item"
                                         onClick={() => handleAddCandidate(candidate.id)}
                                     >
@@ -274,6 +340,14 @@ const EventCard = ({ event, onEdit, onView, registrationCount = 0, onRefresh }: 
                         </div>
                     </div>
                 )}
+                <div className="event-footer">
+                    <span className="event-creator">
+                        {event.createdByFirstName} {event.createdByLastName}
+                    </span>
+                    <span className="event-date">
+                        {new Date(event.createdAt).toLocaleDateString('de-DE')}
+                    </span>
+                </div>
             </div>
         </div>
     );

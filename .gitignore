@@ -12,10 +12,11 @@ out/
 # environment
 .env
 .env.dev
+.env.production
+.env.ldap
 .env.local
 .env.*.local
 *.local
-.env.production
 
 # logs
 logs/

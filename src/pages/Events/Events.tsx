@@ -1,66 +1,55 @@
 import { useState } from "react";
 import Header from "~/components/Header/Header.tsx";
 import EventList from "~/components/EventList/EventList.tsx";
-import EventModal from "~/components/EventModal/EventModal.tsx";
+import EventCreationPage from "~/components/EventCreationPage/EventCreationPage.tsx";
 import InfoModal from "~/components/InfoModal/InfoModal.tsx";
 import MessageBanner, { type Message } from "~/components/MessageBanner/MessageBanner.tsx";
-import type { Event, EventForm } from "~/types/Event";
-import { eventsAPI } from "~/api/eventsAPI";
+import type { Event } from "~/types/Event";
 
 import "./Events.scss";
 
 const Events = () => {
     const [eventToEdit, setEventToEdit] = useState<Event | null>(null);
     const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
+    const [showCreationPage, setShowCreationPage] = useState(false);
     const [refreshKey, setRefreshKey] = useState(0);
     const [message, setMessage] = useState<Message | null>(null);
     const [searchTerm, setSearchTerm] = useState("");
 
-    const handleCreateEvent = async (eventData: EventForm) => {
-        try {
-            setMessage({ type: "info", text: "Speichere Event..." });
-            await eventsAPI.create(eventData);
-            setMessage({ type: "success", text: "Event erfolgreich erstellt!" });
-            setRefreshKey(prev => prev + 1);
-        } catch (err: any) {
-            setMessage({ type: "error", text: `Fehler: ${err.message}` });
-            console.error("Fehler beim Erstellen:", err.message);
-        }
+    const handleCreateEventClick = () => {
+        setEventToEdit(null);
+        setShowCreationPage(true);
     };
 
-    const handleEditEvent = async (eventData: EventForm) => {
-        if (!eventToEdit) return;
-        try {
-            setMessage({ type: "info", text: "Aktualisiere Event..." });
-            await eventsAPI.update(eventToEdit.id, eventData);
-            setEventToEdit(null);
-            setMessage({ type: "success", text: "Event erfolgreich aktualisiert!" });
-            setRefreshKey(prev => prev + 1);
-        } catch (err: any) {
-            setMessage({ type: "error", text: `Fehler: ${err.message}` });
-            console.error("Fehler beim Bearbeiten:", err.message);
-        }
+    const handleEditEventClick = (event: Event) => {
+        setEventToEdit(event);
+        setShowCreationPage(true);
     };
 
-    const handleDeleteEvent = async (eventId: number) => {
-        if (!window.confirm("Sind Sie sicher, dass Sie dieses Event löschen möchten?")) {
-            return;
-        }
-        
-        try {
-            setMessage({ type: "info", text: "Lösche Event..." });
-            await eventsAPI.delete(eventId);
-            setMessage({ type: "success", text: "Event erfolgreich gelöscht!" });
-            setRefreshKey(prev => prev + 1);
-        } catch (err: any) {
-            setMessage({ type: "error", text: `Fehler beim Löschen: ${err.message}` });
-            console.error("Fehler beim Löschen:", err.message);
-        }
+    const handleCreationSuccess = () => {
+        setMessage({ type: "success", text: eventToEdit ? "Event erfolgreich aktualisiert!" : "Event erfolgreich erstellt!" });
+        setRefreshKey(prev => prev + 1);
     };
 
-    const handleCloseModal = () => {
+    const handleBackFromCreation = () => {
+        setShowCreationPage(false);
         setEventToEdit(null);
     };
+
+    // If showing creation page, render it instead of the event list
+    if (showCreationPage) {
+        return (
+            <div className="event-dashboard-page">
+                <Header />
+                <MessageBanner message={message} onClose={() => setMessage(null)} />
+                <EventCreationPage
+                    event={eventToEdit}
+                    onBack={handleBackFromCreation}
+                    onSuccess={handleCreationSuccess}
+                />
+            </div>
+        );
+    }
 
     return (
         <div className="event-dashboard-page">
@@ -77,18 +66,18 @@ const Events = () => {
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
                             />
-                            <EventModal 
-                                eventToEdit={eventToEdit} 
-                                onSave={eventToEdit ? handleEditEvent : handleCreateEvent}
-                                onClose={handleCloseModal}
-                                onDelete={handleDeleteEvent}
-                            />
+                            <button 
+                                className="create-event-button" 
+                                onClick={handleCreateEventClick}
+                            >
+                                + Event erstellen
+                            </button>
                         </div>
                     </div>
                     <EventList 
                         refreshKey={refreshKey}
                         searchTerm={searchTerm}
-                        onEditStart={(event) => setEventToEdit(event)}
+                        onEditStart={handleEditEventClick}
                         onViewStart={(event) => setSelectedEvent(event)}
                     />
                 </div>

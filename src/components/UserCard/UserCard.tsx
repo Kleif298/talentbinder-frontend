@@ -9,6 +9,8 @@ const UserCard = ({ user }: UserCardProps) => {
                 return 'role-admin';
             case 'recruiter':
                 return 'role-recruiter';
+            case 'developer':
+                return 'role-developer';
             default:
                 return 'role-default';
         }

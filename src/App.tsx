@@ -3,6 +3,7 @@ import Login from "./pages/Login/Login";
 import Register from "./pages/Register/Register";
 import Candidates from "./pages/Candidates/Candidates.tsx";
 import Events from "./pages/Events/Events";
+import Reports from "./pages/Reports/Reports.tsx";
 import Users from "./pages/Users/Users";
 import Logging from "./pages/Logging/Logging.tsx";
 import ProtectedRoute from "./guards/ProtectedRoute";
@@ -31,6 +32,14 @@ function App() {
           element={
             <ProtectedRoute>
               <Events />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/reports"
+          element={
+            <ProtectedRoute>
+              <Reports />
             </ProtectedRoute>
           }
         />

@@ -155,10 +155,10 @@ const InfoModal = ({ event, isOpen, onClose }: InfoModalProps) => {
                   <span className="label">Start:</span>
                   <span className="value">{new Date(event.startingAt).toLocaleString()}</span>
                   
-                  {event.duration && (
+                  {event.endingAt && (
                     <>
-                      <span className="label">Dauer:</span>
-                      <span className="value">{event.duration}</span>
+                      <span className="label">Ende:</span>
+                      <span className="value">{new Date(event.endingAt).toLocaleString()}</span>
                     </>
                   )}
                   

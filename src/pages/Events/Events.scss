@@ -82,6 +82,29 @@
     }
 }
 
+.create-event-button {
+    padding: 10px 20px;
+    background: vars.$primary-color;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+    
+    &:hover {
+        background: darken(vars.$primary-color, 10%);
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(59, 130, 246, 0.2);
+    }
+    
+    &:active {
+        transform: translateY(0);
+    }
+}
+
 .event-list-container {
     width: 100%;
     max-width: 1400px;

@@ -5,8 +5,11 @@ import { setCachedUser } from "~/utils/auth.ts";
 import { useNavigate, useLocation } from 'react-router-dom';
 import "./Register.scss";
 
+const NODE_ENV = import.meta.env.MODE;
 const API_URL = import.meta.env.VITE_API_URL;
 const API_BASE = API_URL ? `${API_URL}/api` : '/api';
+
+//const NODE_ENV = 
 
 const Registration: React.FC = () => {
     const navigate = useNavigate();
@@ -18,6 +21,11 @@ const Registration: React.FC = () => {
     const [confirmLocalPassword, setConfirmLocalPassword] = useState("");
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState<Message | null>(null);
+
+    const devLogin = () => {
+        setEmail('leif@sunrise.net');
+    }
+
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -175,6 +183,16 @@ const Registration: React.FC = () => {
                         {loading ? 'Registriere...' : 'Registrieren'}
                     </button>
                 </form>
+
+                {/*dev login*/}
+                {NODE_ENV=='development' && <button
+                    onClick={() => devLogin()}
+                    className="submit-button"
+
+                >
+
+                    Dev Login
+                </button>}
 
                 <div className="login-info">
                     <p>

@@ -14,7 +14,7 @@ const API_BASE = API_URL ? `${API_URL}/api` : '/api';
 console.log('🔧 API Configuration:', { 
     VITE_API_URL: import.meta.env.VITE_API_URL,
     API_BASE,
-    mode: import.meta.env.MODE 
+    MODE: import.meta.env.MODE 
 });
 
 const Login: React.FC = () => {
@@ -238,9 +238,9 @@ const Login: React.FC = () => {
                             : 'Einloggen'}
                     </button>
                 </form>
-
+                            
                 {/* Info message about account creation */}
-                {!checkingLdap && ldapAvailable && (
+                {/*!checkingLdap && ldapAvailable && (
                     <div className="login-info">
                         <p>
                             💡 <strong>Noch kein Account?</strong>{" "}
@@ -252,7 +252,7 @@ const Login: React.FC = () => {
                             </span>
                         </p>
                     </div>
-                )}
+                )*/}
             </div>
         </div>
     );

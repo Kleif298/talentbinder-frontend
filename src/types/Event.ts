@@ -7,8 +7,16 @@ export interface Event {
   id: number;
   title: string;
   description: string;
+  branchId?: number;
+  templateId?: number;
+  locationId: number;
+  locationName?: string;
+  locationAddress?: string;
+  locationCity?: string;
+  locationPlz?: string;
+  dateAt?: string;
   startingAt: string;
-  duration?: string;
+  endingAt?: string;
   invitationsSendingAt?: string;
   registrationsClosingAt?: string;
   registrationRequired?: boolean;
@@ -23,8 +31,13 @@ export interface Event {
 export type EventForm = {
   title?: string;
   description?: string;
+  branchId?: number;
+  templateId?: number;
+  locationId?: number;
+  registrationRequired?: boolean;
+  dateAt?: string;
   startingAt?: string;
-  duration?: string;
+  endingAt?: string;
   invitationsSendingAt?: string;
   registrationsClosingAt?: string;
 };
@@ -35,6 +48,8 @@ export interface EventCardProps {
   onView: (event: Event) => void;
   registrationCount?: number;
   onRefresh?: () => void;
+  readonly?: boolean;
+  onReport?: (event: Event) => void;
 }
 
 export interface EventListProps {

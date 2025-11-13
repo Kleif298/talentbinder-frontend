@@ -34,7 +34,7 @@ const EventModal = ({ eventToEdit, onSave, onClose, onDelete }: EventModalProps)
     title: "",
     description: "",
     startingAt: "",
-    duration: "",
+    endingAt: "",
     invitationsSendingAt: "",
     registrationsClosingAt: "",
   });
@@ -82,18 +82,28 @@ const EventModal = ({ eventToEdit, onSave, onClose, onDelete }: EventModalProps)
         }
       };
 
-      // Konvertiere Dauer (HH:MM:SS zu HH:MM)
-      const formatDuration = (duration: string | undefined) => {
-        if (!duration) return "";
-        // Wenn Format bereits HH:MM:SS ist, nehme nur HH:MM
-        return duration.substring(0, 5);
+      // Konvertiere endingAt (ISO zu datetime-local Format)
+      const formatEndingAt = (endingAt: string | undefined) => {
+        if (!endingAt) return "";
+        try {
+          const date = new Date(endingAt);
+          if (isNaN(date.getTime())) return "";
+          const year = date.getFullYear();
+          const month = String(date.getMonth() + 1).padStart(2, '0');
+          const day = String(date.getDate()).padStart(2, '0');
+          const hours = String(date.getHours()).padStart(2, '0');
+          const minutes = String(date.getMinutes()).padStart(2, '0');
+          return `${year}-${month}-${day}T${hours}:${minutes}`;
+        } catch {
+          return "";
+        }
       };
 
       setFormData({
         title: eventToEdit.title || "",
         description: eventToEdit.description || "",
         startingAt: formatDateTimeLocal(eventToEdit.startingAt),
-        duration: formatDuration(eventToEdit.duration),
+        endingAt: formatEndingAt(eventToEdit.endingAt),
         invitationsSendingAt: formatDate(eventToEdit.invitationsSendingAt),
         registrationsClosingAt: formatDate(eventToEdit.registrationsClosingAt),
       })
@@ -219,21 +229,23 @@ const EventModal = ({ eventToEdit, onSave, onClose, onDelete }: EventModalProps)
         }
       };
 
-      // Konvertiere Dauer (HH:MM zu HH:MM:SS)
-      const convertDuration = (duration: string | undefined) => {
-        if (!duration) return "";
-        // Wenn bereits HH:MM Format, füge :00 für Sekunden hinzu
-        if (duration.match(/^\d{2}:\d{2}$/)) {
-          return `${duration}:00`;
+      // Konvertiere endingAt (datetime-local zu ISO)
+      const convertEndingAtToISO = (endingAtString: string | undefined) => {
+        if (!endingAtString) return undefined;
+        try {
+          const date = new Date(endingAtString);
+          if (isNaN(date.getTime())) return undefined;
+          return date.toISOString();
+        } catch {
+          return undefined;
         }
-        return duration;
       };
 
       const eventDataToSend: EventForm = {
         title: formData.title,
         description: formData.description,
         startingAt: convertToISO(formData.startingAt),
-        duration: convertDuration(formData.duration),
+        endingAt: convertEndingAtToISO(formData.endingAt),
         invitationsSendingAt: convertDateToISO(formData.invitationsSendingAt),
         registrationsClosingAt: convertDateToISO(formData.registrationsClosingAt),
       };
@@ -287,7 +299,7 @@ const EventModal = ({ eventToEdit, onSave, onClose, onDelete }: EventModalProps)
       title: "",
       description: "",
       startingAt: "",
-      duration: "",
+      endingAt: "",
       invitationsSendingAt: "",
       registrationsClosingAt: "",
     })
@@ -366,13 +378,13 @@ const EventModal = ({ eventToEdit, onSave, onClose, onDelete }: EventModalProps)
                   </div>
 
                   <div className="form-group">
-                    <label htmlFor="duration">Dauer</label>
+                    <label htmlFor="endingAt">Enddatum & Zeit</label>
                     <input
-                      id="duration"
-                      type="time"
-                      name="duration"
-                      placeholder="z.B. 2 Stunden"
-                      value={formData.duration || ""}
+                      id="endingAt"
+                      type="datetime-local"
+                      name="endingAt"
+                      placeholder="z.B. Enddatum & Zeit"
+                      value={formData.endingAt || ""}
                       onChange={handleInputChange}
                     />
                   </div>

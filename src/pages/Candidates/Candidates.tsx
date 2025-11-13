@@ -24,7 +24,6 @@ const Candidates = () => {
   const [candidateToEdit, setCandidateToEdit] = useState<Candidate | null>(null);
   const [selectedCandidate, setSelectedCandidate] = useState<Candidate | null>(null);
   const [apprenticeships, setApprenticeships] = useState<Apprenticeship[]>([]);
-  const isAdmin = getAdminStatus();
 
   // Lade Branchen und Lehrstellen beim Mount
   useEffect(() => {
@@ -105,15 +104,13 @@ const Candidates = () => {
           <div className="head-of-list">
             <div className="head-of-list-content">
               <Filter onFilterChange={handleFilterChange} /> 
-              {isAdmin && (
-                <ModalCandidates 
-                  onSave={handleSaveCandidate}
-                  candidateToEdit={candidateToEdit}
-                  onClose={handleCloseModal}
-                  onDelete={handleDeleteCandidate}
-                  apprenticeships={apprenticeships}
-                />
-              )}
+              <ModalCandidates 
+                onSave={handleSaveCandidate}
+                candidateToEdit={candidateToEdit}
+                onClose={handleCloseModal}
+                onDelete={handleDeleteCandidate}
+                apprenticeships={apprenticeships}
+              />
             </div>
           </div>
           <GridList 
